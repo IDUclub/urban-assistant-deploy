@@ -43,3 +43,16 @@ spec:
         automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
         syncOptions: [CreateNamespace=true, ServerSideApply=true]
       revisionHistoryLimit: 10
+  templatePatch: |
+    {{- if hasKey . "vendoredPath" }}
+    spec:
+      sources:
+        - repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+          targetRevision: main
+          path: '{{ .vendoredPath }}'
+          helm:
+            releaseName: '{{ .name }}'
+            ignoreMissingValueFiles: false
+            valueFiles:
+              - '{{ .vendoredValues }}'
+    {{- end }}

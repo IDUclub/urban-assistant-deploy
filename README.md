@@ -105,8 +105,9 @@ kubectl port-forward -n argocd svc/argocd-server 8080:443
 An ApplicationSet creates one Application per service. Separate Applications
 own cluster foundation, operators, Vault integration, monitoring, Kafka,
 Gateway and migration prerequisites. Operator Applications are generated from
-`operators/releases.yaml` and use upstream charts plus values from this Git
-repository via multiple sources.
+`operators/releases.yaml`. Most use upstream charts plus values from this Git
+repository via multiple sources. The Vault Secrets Operator chart is pinned and
+vendored in Git because the cluster cannot reach HashiCorp's Helm repository.
 
 Urban API and PZZ migrations are `PreSync` hooks with
 `BeforeHookCreation,HookSucceeded`, bounded retries and deadlines. A failed hook

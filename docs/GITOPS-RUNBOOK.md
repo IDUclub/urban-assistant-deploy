@@ -157,6 +157,11 @@ and never adding `--prune`:
 4. `dev-urban-api-prerequisites` and `dev-pzz-compare-prerequisites`;
 5. application Applications one at a time.
 
+The Vault Secrets Operator chart is vendored under
+`operators/vault-secrets-operator` because the cluster cannot reach HashiCorp's
+Helm repository. Verify the recorded upstream digest before upgrading it; Argo
+CD renders the vendored chart directly from this Git repository.
+
 For Urban API and PZZ, first inspect the existing migration Jobs and database
 backup state. Do not sync their Applications until a repeated forward migration
 is confirmed safe:

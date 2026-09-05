@@ -26,7 +26,10 @@ helmReleases:
     repository: https://helm.releases.hashicorp.com
     chart: vault-secrets-operator
     version: 1.5.0
-    values: operators/vault-secrets-operator-values.yaml
+    values: operators/vault-secrets-operator/values-urban-assistant.yaml
+    vendoredPath: operators/vault-secrets-operator
+    vendoredValues: values-urban-assistant.yaml
+    upstreamDigest: sha256:4f822615d9346fd4f8b96b8852cc44c83042a2f1511515e2631ec2fd1da03d80
   - name: kube-prometheus-stack
     namespace: monitoring
     repository: https://prometheus-community.github.io/helm-charts
@@ -69,4 +72,4 @@ manifestAddons:
     namespace: kube-system
     version: v0.9.0
     source: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.0/components.yaml
-    patch: operators/metrics-server-patch.yaml
+    patch: operators/metrics-server/patch.yaml

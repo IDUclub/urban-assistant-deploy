@@ -134,9 +134,10 @@ rollout одного сервиса не объединяется с rollout о�
 Applications управляют cluster foundation, operators, Vault integration,
 monitoring, Kafka, Gateway и prerequisites.
 
-Операторы генерируются из `operators/releases.yaml`. Helm chart загружается из
-upstream repository, а values читаются из этого Git-репозитория через Argo CD
-multiple sources.
+Операторы генерируются из `operators/releases.yaml`. Большинство Helm charts
+загружаются из upstream repository, а values читаются из этого Git-репозитория
+через Argo CD multiple sources. Chart Vault Secrets Operator зафиксирован и
+хранится в Git, потому что кластер не имеет доступа к Helm repository HashiCorp.
 
 ### Adoption и steady state
 

@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pzz-compare
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/monitor: pzz-compare
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pzz-workers
+spec:
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/monitor
+        operator: In
+        values: [pzz-worker, pzz-worker-llm]
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

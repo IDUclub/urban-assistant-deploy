@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cluster
+  - platform/monitoring
+  - platform/vault
+  - platform/kafka
+  - platform/gateway
+  - prerequisites/urban-api
+  - prerequisites/pzz-compare
+  - apps/frontend
+  - apps/urban-api
+  - apps/idu-dvd
+  - apps/normgraph
+  - apps/gmart
+  - apps/chat-storage
+  - apps/object-effects
+  - apps/genbuilder
+  - apps/genplanner
+  - apps/pzz-compare
+  - apps/scenarios-conductor
+  - apps/urban-mcp

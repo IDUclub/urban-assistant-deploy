@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jaeger-badger
+  namespace: monitoring
+spec:
+  storageClassName: urban-assistant-nfs
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Publish only the Prometheus web/API port. The chart-owned service remains
+# ClusterIP so its internal config-reloader port is not exposed as a NodePort.
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-nodeport
+  namespace: monitoring
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: prometheus
+    operator.prometheus.io/name: kube-prometheus-stack-prometheus
+  ports:
+    - name: web
+      port: 9090
+      targetPort: 9090
+      nodePort: 31201
+---
+# Fixed NodePort for the external Grafana and for access through the corporate VPN.
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query-nodeport
+  namespace: monitoring
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/component: all-in-one
+  ports:
+    - name: http-query
+      port: 16686
+      targetPort: 16686
+      nodePort: 31202
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: jaeger
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jaeger
+      app.kubernetes.io/instance: jaeger
+      app.kubernetes.io/component: all-in-one
+  endpoints:
+    - port: internal-metrics
+      path: /metrics
+      interval: 30s

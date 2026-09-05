@@ -1,0 +1,77 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: dual-role
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  replicas: 3
+  roles:
+    - controller
+    - broker
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  jvmOptions:
+    "-Xms": 512m
+    "-Xmx": 512m
+  storage:
+    type: persistent-claim
+    size: 5Gi
+    class: urban-assistant-nfs
+    deleteClaim: false
+    kraftMetadata: shared
+  template:
+    pod:
+      enableServiceLinks: false
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: strimzi.io/pool-name
+                    operator: In
+                    values: [dual-role]
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: urban-assistant-kafka
+spec:
+  kafka:
+    version: 4.2.1
+    metadataVersion: 4.2-IV0
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+    config:
+      auto.create.topics.enable: false
+      num.partitions: 3
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      log.retention.hours: 24
+      log.retention.bytes: 134217728
+      log.segment.bytes: 67108864
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+  kafkaExporter:
+    topicRegex: ".*"
+    groupRegex: ".*"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi

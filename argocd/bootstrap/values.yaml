@@ -1,0 +1,33 @@
+global:
+  domain: argocd.internal
+
+configs:
+  params:
+    server.insecure: false
+  cm:
+    admin.enabled: "true"
+    application.resourceTrackingMethod: annotation
+
+server:
+  service:
+    type: ClusterIP
+  metrics:
+    enabled: true
+
+controller:
+  metrics:
+    enabled: true
+
+repoServer:
+  metrics:
+    enabled: true
+
+applicationSet:
+  metrics:
+    enabled: true
+
+notifications:
+  enabled: false
+
+dex:
+  enabled: false

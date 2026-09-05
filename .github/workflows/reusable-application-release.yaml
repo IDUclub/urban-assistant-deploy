@@ -1,0 +1,264 @@
+name: Reusable Kubernetes release
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: Service key from services.yaml
+        required: true
+        type: string
+      test-command:
+        description: Trusted repository test command
+        required: true
+        type: string
+    secrets:
+      DEPLOY_BOT_APP_ID:
+        required: true
+      DEPLOY_BOT_PRIVATE_KEY:
+        required: true
+      REGISTRY_USERNAME:
+        required: false
+      REGISTRY_PASSWORD:
+        required: false
+      MAPBOX_PUBLIC_TOKEN:
+        required: false
+      FRONTEND_KEYCLOAK_AUTH_URL:
+        required: false
+      FRONTEND_KEYCLOAK_LOGOUT_REDIRECT:
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kubernetes-release-${{ github.repository }}-${{ inputs.service }}-dev
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.contract.outputs.images }}
+      registry: ${{ steps.contract.outputs.registry }}
+      config-revision: ${{ steps.config-revision.outputs.sha }}
+    steps:
+      - name: Create deploy-repository token
+        id: deploy-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          owner: IDUclub
+          repositories: urban-assistant-deploy
+
+      - uses: actions/checkout@v4
+        with:
+          repository: IDUclub/urban-assistant-deploy
+          ref: main
+          token: ${{ steps.deploy-token.outputs.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: python -m pip install --disable-pip-version-check PyYAML==6.0.3
+
+      - name: Read and validate build contract
+        id: contract
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: >-
+          python scripts/export-build-contract.py
+          --service "${{ inputs.service }}"
+          --github-output "$GITHUB_OUTPUT"
+
+      - name: Capture config revision
+        id: config-revision
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run application tests
+        env:
+          TEST_COMMAND: ${{ inputs.test-command }}
+        run: bash -euo pipefail -c "$TEST_COMMAND"
+
+  build:
+    needs: [contract, tests]
+    runs-on: 13_runner
+    environment: dev-build
+    strategy:
+      fail-fast: true
+      matrix:
+        include: ${{ fromJson(needs.contract.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm this revision is still dev HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/dev" --jq .object.sha)"
+          test "${head_sha}" = "${GITHUB_SHA}"
+
+      - name: Create deploy-repository token for frontend config
+        if: inputs.service == 'frontend'
+        id: deploy-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          owner: IDUclub
+          repositories: urban-assistant-deploy
+
+      - name: Check out controlled frontend config
+        if: inputs.service == 'frontend'
+        uses: actions/checkout@v4
+        with:
+          repository: IDUclub/urban-assistant-deploy
+          ref: ${{ needs.contract.outputs.config-revision }}
+          token: ${{ steps.deploy-token.outputs.token }}
+          path: .urban-assistant-deploy
+
+      - name: Render frontend build environment
+        if: inputs.service == 'frontend'
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+          FRONTEND_KEYCLOAK_AUTH_URL: ${{ secrets.FRONTEND_KEYCLOAK_AUTH_URL }}
+          FRONTEND_KEYCLOAK_LOGOUT_REDIRECT: ${{ secrets.FRONTEND_KEYCLOAK_LOGOUT_REDIRECT }}
+        run: |
+          bash .urban-assistant-deploy/scripts/render-frontend-env.sh dev > service.env
+          rm -rf -- .urban-assistant-deploy
+
+      - name: Log in to registry
+        if: env.REGISTRY_USERNAME != ''
+        uses: docker/login-action@v3
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        with:
+          registry: ${{ needs.contract.outputs.registry }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Enforce immutable dev tag
+        env:
+          REPOSITORY: ${{ matrix.repository }}
+          TAG: dev-${{ github.sha }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          registry="${REPOSITORY%%/*}"
+          image_path="${REPOSITORY#*/}"
+          auth=()
+          if [[ -n "${REGISTRY_USERNAME}" ]]; then
+            auth=(--user "${REGISTRY_USERNAME}:${REGISTRY_PASSWORD}")
+          fi
+          status="$(curl "${auth[@]}" --silent --insecure --output /dev/null --write-out '%{http_code}' \
+            --head \
+            -H 'Accept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json' \
+            "https://${registry}/v2/${image_path}/manifests/${TAG}")"
+          if [[ "${status}" == 200 ]]; then
+            echo "Immutable tag already exists: ${REPOSITORY}:${TAG}" >&2
+            exit 1
+          fi
+          if [[ "${status}" != 404 ]]; then
+            echo "Registry preflight returned HTTP ${status}" >&2
+            exit 1
+          fi
+
+      - name: Build and push immutable image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          push: true
+          tags: ${{ matrix.repository }}:dev-${{ github.sha }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Record published digest
+        env:
+          ALIAS: ${{ matrix.alias }}
+          REPOSITORY: ${{ matrix.repository }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p release-digests
+          jq -n --arg alias "$ALIAS" --arg repository "$REPOSITORY" --arg digest "$DIGEST" \
+            '{alias: $alias, repository: $repository, digest: $digest}' \
+            > "release-digests/${ALIAS}.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ matrix.alias }}
+          path: release-digests/${{ matrix.alias }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  dispatch:
+    needs: [contract, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject a build that is no longer dev HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/dev" --jq .object.sha)"
+          test "${head_sha}" = "${GITHUB_SHA}"
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: digest-*
+          path: release-digests
+          merge-multiple: true
+
+      - name: Build one atomic promotion event
+        id: payload
+        env:
+          SERVICE: ${{ inputs.service }}
+          CONFIG_REVISION: ${{ needs.contract.outputs.config-revision }}
+        run: |
+          images="$(jq -sc 'sort_by(.alias)' release-digests/*.json)"
+          if [[ "${SERVICE}" == frontend ]]; then
+            payload="$(jq -cn \
+              --arg service "$SERVICE" \
+              --arg source_repository "$GITHUB_REPOSITORY" \
+              --arg source_sha "$GITHUB_SHA" \
+              --arg workflow_run_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+              --arg config_revision "$CONFIG_REVISION" \
+              --argjson images "$images" \
+              '{service: $service, environment: "dev", source_repository: $source_repository, source_sha: $source_sha, images: $images, workflow_run_url: $workflow_run_url, config_revision: $config_revision}')"
+          else
+            payload="$(jq -cn \
+              --arg service "$SERVICE" \
+              --arg source_repository "$GITHUB_REPOSITORY" \
+              --arg source_sha "$GITHUB_SHA" \
+              --arg workflow_run_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+              --argjson images "$images" \
+              '{service: $service, environment: "dev", source_repository: $source_repository, source_sha: $source_sha, images: $images, workflow_run_url: $workflow_run_url}')"
+          fi
+          echo "json=${payload}" >> "$GITHUB_OUTPUT"
+
+      - name: Create deploy-repository dispatch token
+        id: deploy-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          owner: IDUclub
+          repositories: urban-assistant-deploy
+
+      - name: Dispatch promotion
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.deploy-token.outputs.token }}
+          repository: IDUclub/urban-assistant-deploy
+          event-type: promote-dev-image
+          client-payload: ${{ steps.payload.outputs.json }}

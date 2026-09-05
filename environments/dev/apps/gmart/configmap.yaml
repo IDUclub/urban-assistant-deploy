@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gmart-config
+data:
+  PORT: "8080"
+  FASTAPI_WORKERS: "1"
+  FASTMCP_WORKERS: "1"
+  LLM_BACKEND: openai
+  OPENAI_THINK_EFFORT: medium
+  OPENAI_THINK_MODE: medium
+  DEFAULT_LLM_MODEL_HINT: gpt-oss
+  IDU_MCP_SERVER: http://gmart-mcp:8000/mcp
+  OBJECTS_EFFECTS_MCP_SERVER: http://object-effects:8080/effects/mcp
+  DVD_MCP_SERVER: http://idu-dvd:8000/mcp
+  DVD_API_URL: http://idu-dvd:8000
+  NORM_GRAPH_MCP_SERVER: http://normgraph:8020/mcp
+  URBAN_MCP_SERVER: http://urban-mcp:8001
+  CHAT_STORAGE: http://chat-storage:8000
+  URBAN_API_URL: http://urban-api:8000
+  SERVICE_AUTH_REALM: IDU
+  SERVICE_AUTH_CLIENT_ID: gmart
+  IDU_MCP_WORKSPACE_ENABLED: "false"
+  IDU_MCP_WORKSPACE_DIR: /dev/shm/idu-workspace
+  IDU_MCP_WORKSPACE_TTL_SECONDS: "3600"
+  IDU_MCP_WORKSPACE_MAX_DATASET_BYTES: "134217728"
+  IDU_MCP_WORKSPACE_MAX_TOTAL_BYTES: "2147483648"
+  SCENARIO_DATA_LINEAR_WORKFLOW_ENABLED: "false"
+  SCENARIO_DATA_WORKSPACE_ENABLED: "false"
+  LOG_LEVEL: INFO

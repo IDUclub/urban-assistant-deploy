@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/chat-storage/base
+  - configmap.yaml
+  - vault-secret.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/chat-storage
+    newName: 10.32.11.13:5000/chat_storage
+    digest: sha256:e502cd82ca9bbfa41484315590da8f53b2daad969aaa75bd9a8eb79a925bebed

@@ -1,0 +1,101 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: urban-assistant-http-redirect
+  namespace: urban-assistant-dev
+spec:
+  parentRefs:
+    - name: urban-assistant-dev
+      sectionName: http
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            port: 31302
+            statusCode: 308
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: urban-assistant-https
+  namespace: urban-assistant-dev
+spec:
+  parentRefs:
+    - name: urban-assistant-dev
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /urban-api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api/v1
+      backendRefs:
+        - name: urban-api
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /gmart
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: gmart
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /chat-storage
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api/v1
+      backendRefs:
+        - name: chat-storage
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /pzz-compare
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: pzz-compare
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: urban-assistant-frontend
+          port: 3000
+---
+# gMART and PZZ use long-lived SSE responses; Envoy's default is 15 seconds.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: urban-assistant-streaming-timeout
+  namespace: urban-assistant-dev
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: urban-assistant-https
+  timeout:
+    http:
+      requestTimeout: 0s

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: normgraph-config
+data:
+  NG_NEO4J_DATABASE: neo4j
+  NG_DVD_BASE_URL: http://idu-dvd:8000
+  NG_LLM_PROVIDER: openai_compatible
+  NG_LLM_MODEL: gpt-oss:20b
+  NG_EMBEDDINGS_PROVIDER: openai_compatible
+  NG_EMBEDDINGS_MODEL: ai-sage/Giga-Embeddings-instruct
+  NG_KAFKA_BOOTSTRAP_SERVERS: urban-assistant-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+  NG_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.kafka.svc.cluster.local:8081
+  NG_KAFKA_CLIENT_ID: normgraph
+  NG_KAFKA_GROUP_ID: normgraph-sync-dev
+  NG_KAFKA_TOPIC: document.events
+  NG_KAFKA_AUTO_OFFSET_RESET: latest
+  NG_RECONCILE_ON_STARTUP: "true"
+  NG_SERVICE_AUTH_REALM: IDU
+  NG_SERVICE_AUTH_CLIENT_ID: normgraph
+  NG_LOG_LEVEL: INFO
+  NG_LOG_DIR: /tmp/normgraph/logs
+  NG_LOG_FILE: app.log

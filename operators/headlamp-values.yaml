@@ -1,0 +1,16 @@
+replicaCount: 1
+
+# Keep the existing dev endpoint. Port 31102 remains reserved for a later,
+# coordinated migration from the legacy address.
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30080
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi

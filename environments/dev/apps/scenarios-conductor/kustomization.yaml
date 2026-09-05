@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/scenarios-conductor/base
+  - vault-secret.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/scenarios-conductor
+    newName: 10.32.11.13:5000/scenarios_conductor
+    digest: sha256:5b7ef1936ad1a0afa84c6392a093ffd237c67d4f5111001614f8e9da19bc6784

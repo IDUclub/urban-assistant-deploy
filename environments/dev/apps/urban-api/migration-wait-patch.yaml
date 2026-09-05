@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: urban-migrate
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.37.0
+          command: ["sh", "-ec"]
+          args:
+            - until nc -z -w 2 "$DB_HOST" "$DB_PORT"; do sleep 2; done
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: urban-api-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: urban-api-config
+                  key: DB_PORT
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {cpu: 50m, memory: 32Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

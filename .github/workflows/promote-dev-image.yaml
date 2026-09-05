@@ -1,0 +1,103 @@
+name: Promote dev image
+
+on:
+  repository_dispatch:
+    types: [promote-dev-image]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: promote-dev-${{ github.event.client_payload.service }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: 13_runner
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install updater dependency
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.3
+
+      - name: Validate event and stage atomic digest update
+        id: promotion
+        env:
+          PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
+        run: >-
+          python scripts/update-image.py
+          --root .
+          --payload-json "$PAYLOAD_JSON"
+          --github-output "$GITHUB_OUTPUT"
+
+      - name: Create source-repository read token
+        id: source-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          owner: ${{ steps.promotion.outputs.source_owner }}
+          repositories: ${{ steps.promotion.outputs.source_name }}
+
+      - name: Reject stale builds
+        env:
+          GH_TOKEN: ${{ steps.source-token.outputs.token }}
+          SOURCE_REPOSITORY: ${{ steps.promotion.outputs.source_repository }}
+          SOURCE_SHA: ${{ steps.promotion.outputs.source_sha }}
+        run: |
+          head_sha="$(gh api "repos/${SOURCE_REPOSITORY}/git/ref/heads/dev" --jq .object.sha)"
+          if [[ "${head_sha}" != "${SOURCE_SHA}" ]]; then
+            echo "Rejected stale build ${SOURCE_SHA}; dev HEAD is ${head_sha}" >&2
+            exit 1
+          fi
+
+      - name: Verify digests in the on-prem registry
+        env:
+          PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
+          REGISTRY_SCHEME: https
+          REGISTRY_INSECURE_TLS: "true"
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_READ_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_READ_PASSWORD }}
+        run: bash scripts/verify-registry-digests.sh
+
+      - name: Create deploy-repository write token
+        id: deploy-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          owner: IDUclub
+          repositories: urban-assistant-deploy
+
+      - name: Create promotion pull request
+        id: pull-request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.deploy-token.outputs.token }}
+          branch: ${{ steps.promotion.outputs.branch_name }}
+          delete-branch: true
+          title: ${{ steps.promotion.outputs.pr_title }}
+          commit-message: ${{ steps.promotion.outputs.pr_title }}
+          body: |
+            Automated dev promotion from `${{ steps.promotion.outputs.source_repository }}`.
+
+            - Source SHA: `${{ steps.promotion.outputs.source_sha }}`
+            - Source workflow: ${{ github.event.client_payload.workflow_run_url }}
+            - Updated overlay: `${{ steps.promotion.outputs.overlay }}`
+          labels: |
+            automated
+            environment/dev
+
+      - name: Enable squash auto-merge
+        if: steps.pull-request.outputs.pull-request-number != ''
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.deploy-token.outputs.token }}
+          pull-request-number: ${{ steps.pull-request.outputs.pull-request-number }}
+          merge-method: squash

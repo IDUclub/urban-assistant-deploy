@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: object-effects
+  annotations:
+    configmap.reloader.stakater.com/reload: object-effects-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: object-effects
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: object-effects
+        app.kubernetes.io/component: api-mcp
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: app
+          image: urban-assistant/object-effects:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - exec gunicorn --bind 0.0.0.0:8080 --workers 1 --worker-class uvicorn.workers.UvicornWorker app.main:app
+          env:
+            - name: APP_ENV
+              value: development
+          envFrom:
+            - secretRef:
+                name: object-effects-secrets
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 9464
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/object-effects
+          startupProbe:
+            httpGet:
+              path: /status
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: object-effects-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: object-effects
+  labels:
+    app.kubernetes.io/monitor: object-effects
+spec:
+  selector:
+    app.kubernetes.io/name: object-effects
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: object-effects-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: object-effects
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 31006

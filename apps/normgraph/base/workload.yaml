@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: normgraph
+  annotations:
+    configmap.reloader.stakater.com/reload: normgraph-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: normgraph
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: normgraph
+        app.kubernetes.io/component: api-mcp
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: app
+          image: urban-assistant/normgraph:base
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: normgraph-config
+            - secretRef:
+                name: normgraph-secrets
+          ports:
+            - name: http
+              containerPort: 8020
+          volumeMounts:
+            - name: runtime
+              mountPath: /tmp/normgraph
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: normgraph
+spec:
+  selector:
+    app.kubernetes.io/name: normgraph
+  ports:
+    - name: http
+      port: 8020
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: normgraph-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: normgraph
+  ports:
+    - name: http
+      port: 8020
+      targetPort: http
+      nodePort: 31003

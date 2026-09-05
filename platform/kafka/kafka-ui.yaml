@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-ui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-ui
+        app.kubernetes.io/component: messaging-ui
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: kafka-ui
+          image: provectuslabs/kafka-ui:v0.7.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: urban-assistant-dev
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: urban-assistant-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+            - name: KAFKA_CLUSTERS_0_SCHEMAREGISTRY
+              value: http://schema-registry.kafka.svc.cluster.local:8081
+            - name: DYNAMIC_CONFIG_ENABLED
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            tcpSocket:
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: kafka-ui
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 31101

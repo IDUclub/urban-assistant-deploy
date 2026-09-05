@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/normgraph/base
+  - configmap.yaml
+  - vault-secret.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/normgraph
+    newName: 10.32.11.13:5000/normgraph
+    digest: sha256:896b75546773fda1da1460fe71612e91ea3ade36984ccc3be9532ae2aa8e7623

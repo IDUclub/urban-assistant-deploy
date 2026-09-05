@@ -1,0 +1,7 @@
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: external-vault
+  namespace: urban-assistant-dev
+spec:
+  address: http://10.32.11.13:8200

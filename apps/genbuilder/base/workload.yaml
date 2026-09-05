@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genbuilder
+  annotations:
+    configmap.reloader.stakater.com/reload: genbuilder-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: genbuilder
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: genbuilder
+        app.kubernetes.io/component: api-mcp-a2a
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: app
+          image: urban-assistant/genbuilder:base
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_ENV
+              value: development
+          envFrom:
+            - secretRef:
+                name: genbuilder-secrets
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: metrics
+              containerPort: 9464
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/genbuilder
+          startupProbe:
+            httpGet:
+              path: /docs
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 8Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: genbuilder-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genbuilder
+  labels:
+    app.kubernetes.io/monitor: genbuilder
+spec:
+  selector:
+    app.kubernetes.io/name: genbuilder
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genbuilder-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: genbuilder
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      nodePort: 31007

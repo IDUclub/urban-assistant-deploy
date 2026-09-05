@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: urban-assistant-dev-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+        revision: main
+        directories:
+          - path: environments/dev/apps/*
+  template:
+    metadata:
+      name: 'dev-{{ .path.basename }}'
+      labels:
+        environment: dev
+        app.kubernetes.io/part-of: urban-assistant
+    spec:
+      project: urban-assistant-apps
+      source:
+        repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: urban-assistant-dev
+      syncPolicy:
+        automated:
+          enabled: true
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+      revisionHistoryLimit: 10

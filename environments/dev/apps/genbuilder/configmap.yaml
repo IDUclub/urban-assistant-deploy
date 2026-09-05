@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: genbuilder-env-file
+data:
+  .env.development: |
+    UrbanDB_API=http://urban-api:8000
+    UrbanDB_SOURCE=OSM
+    UrbanDB_YEAR=2024
+    ChatStorage_API=http://chat-storage:8000
+    Chat_Model=gpt-oss-20b
+    LOG_FILE=/tmp/genbuilder/genbuilder.log
+    PROMETHEUS_PORT=9464
+    AUTH_VERIFY=true
+    AUTH_VALID_AUDIENCES=[]
+    KEYCLOAK_REALM=IDU
+    KEYCLOAK_CLIENT_ID=genbuilder
+    FILESERVER_BUCKET_NAME=genbuilder.dev
+    FILESERVER_SECURE=false
+    OUTPUTS_DIR=outputs

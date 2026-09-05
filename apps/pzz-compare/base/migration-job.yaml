@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pzz-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    app.kubernetes.io/name: pzz-migrate
+    app.kubernetes.io/part-of: urban-assistant
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 1200
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-migrate
+        app.kubernetes.io/part-of: urban-assistant
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - python service/wait_for_db.py && exec alembic upgrade head
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

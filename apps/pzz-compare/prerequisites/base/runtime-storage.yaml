@@ -1,0 +1,11 @@
+# Shared scratch space for API uploads and Celery workers; PostgreSQL stays external.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pzz-runtime-data
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: urban-assistant-nfs
+  resources:
+    requests:
+      storage: 2Gi

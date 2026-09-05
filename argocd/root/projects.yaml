@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: urban-assistant-apps
+  namespace: argocd
+spec:
+  description: Namespaced Urban Assistant application workloads
+  sourceRepos:
+    - https://github.com/IDUclub/urban-assistant-deploy.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: urban-assistant-dev
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  clusterResourceWhitelist: []
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: urban-assistant-platform
+  namespace: argocd
+spec:
+  description: Reviewed cluster foundation, operators and shared platform
+  sourceRepos:
+    - "*"
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,5 @@
+/.github/ @IDUclub/platform
+/argocd/ @IDUclub/platform
+/cluster/ @IDUclub/platform
+/operators/ @IDUclub/platform
+/environments/prod/ @IDUclub/platform

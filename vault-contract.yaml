@@ -1,0 +1,89 @@
+apiVersion: deployment.urban-assistant/v1alpha1
+kind: VaultContract
+mount: urban-assistant-kv
+paths:
+  dev/chat-storage:
+    - auth_server_url
+    - mongo_password
+    - mongo_url
+    - mongo_user
+    - service_auth_client_secret
+    - service_auth_server_url
+  dev/gateway:
+    - tls_crt
+    - tls_key
+  dev/genbuilder:
+    - a2a_public_url
+    - fileserver_endpoint
+    - fs_access_key
+    - fs_secret_key
+    - keycloak_client_secret
+    - keycloak_url
+    - ollama_api
+  dev/genplanner:
+    - ecodonut_api
+    - keycloak_client_secret
+    - keycloak_url
+    - ollama_base_url
+  dev/gmart:
+    - auth_helper_api_key
+    - auth_helper_url
+    - ollama_api_url
+    - openai_base_url
+    - redis_password
+    - service_auth_client_secret
+    - service_auth_server_url
+    - system_password
+  dev/idu-dvd:
+    - auth_helper_api_key
+    - dvd_auth_helper_url
+    - dvd_embeddings_url
+    - dvd_minio_endpoint
+    - dvd_ollama_base
+    - dvd_qdrant_url
+    - dvd_service_auth_server_url
+    - fs_access_key
+    - fs_secret_key
+    - redis_password
+    - service_auth_client_secret
+  dev/normgraph:
+    - neo4j_password
+    - neo4j_user
+    - ng_embeddings_url
+    - ng_neo4j_uri
+    - ng_ollama_base
+    - ng_service_auth_server_url
+    - service_auth_client_secret
+  dev/object-effects:
+    - service_auth_client_secret
+    - service_auth_server_url
+  dev/pzz-compare:
+    - admin_api_token
+    - auth_server_url
+    - database_url
+    - fileserver_endpoint
+    - fs_access_key
+    - fs_secret_key
+    - keycloak_client_secret
+    - keycloak_url
+    - ollama_base_url
+    - public_base_url
+    - redis_password
+    - vectorizer_url
+    - vllm_api_key
+    - vllm_base_url
+  dev/scenarios-conductor:
+    - auth_server_url
+    - fileserver_url
+    - fs_access_key
+    - fs_secret_key
+    - urban_api_client_secret
+  dev/urban-api:
+    - auth_server_url
+    - db_host
+    - db_password
+    - db_port
+    - db_user
+    - fileserver_url
+    - fs_access_key
+    - fs_secret_key

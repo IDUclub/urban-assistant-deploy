@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pzz-compare-config
+data:
+  APP_ENV: development
+  LOG_LEVEL: INFO
+  DB_WAIT_TIMEOUT: "60"
+  DB_WAIT_INTERVAL: "2"
+  # Migrations are applied once by migration-job.yaml before workloads start.
+  RUN_MIGRATIONS_ON_STARTUP: "false"
+  LLM_BACKEND: vllm
+  VLLM_MAX_PARALLEL_REQUESTS: "6"
+  EMBED_MODEL: ai-sage/Giga-Embeddings-instruct
+  GENERATE_MODEL: openai/gpt-oss-20b
+  CHAT_STORAGE_BASE_URL: http://chat-storage:8000
+  CHAT_STORAGE_TIMEOUT_SECONDS: "10"
+  CHAT_MODEL: openai/gpt-oss-20b
+  CHAT_TEMPERATURE: "0.3"
+  CHAT_REQUEST_TIMEOUT_SECONDS: "900"
+  GEO_LAYER_URL_TTL_SECONDS: "3600"
+  URBAN_API_BASE_URL: http://urban-api:8000
+  URBAN_API_TIMEOUT_SECONDS: "30"
+  AUTH_VERIFY: "true"
+  AUTH_CLIENT_ID: pzz-compare
+  AUTH_VERIFY_AUD: "false"
+  AUTH_VALID_AUDIENCES: ""
+  KEYCLOAK_REALM: IDU
+  KEYCLOAK_CLIENT_ID: pzz-compare
+  KEYCLOAK_SCOPE: openid
+  FILESERVER_BUCKET_NAME: cadaster-classifier.dev
+  FILESERVER_SECURE: "false"
+  TOP_K: "10"
+  EMBED_BATCH_SIZE: "64"
+  TOP_N_EMBED_CANDIDATES: "5"
+  TOP_N_EMBED_CANDIDATES_HARD: "8"
+  MIN_EMBED_CANDIDATE_SIMILARITY: "0.52"
+  PRIORITY_MAX_SUM_DEFAULT: "20"
+  NOT_ALLOWED_LLM_RERANK_NUM_PREDICT: "4000"
+  NOT_ALLOWED_LLM_RERANK_THINK: "false"
+  NOT_ALLOWED_LLM_RERANK_RECALL_TOP_N: "8"
+  OUTPUTS_DIR: /app/outputs
+  TASK_INPUTS_DIR: /app/task_inputs
+  UPLOADS_DIR: /app/uploads
+  WORKER_METRICS_PORT: "9100"
+  MCP_API_BASE_URL: http://pzz-compare:8000
+  MCP_HOST: 0.0.0.0
+  MCP_PORT: "8765"
+  MCP_WORKERS: "1"

@@ -1,0 +1,66 @@
+prometheus:
+  service:
+    # Keep the chart-owned service internal: it also exposes a reloader port,
+    # which would otherwise receive an unwanted, random NodePort.
+    type: ClusterIP
+  prometheusSpec:
+    retention: 3d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: urban-assistant-nfs
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 3Gi
+
+grafana:
+  # Grafana is managed outside this Kubernetes cluster.
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+# A host-level exporter already listens on port 9100 in this cluster.
+nodeExporter:
+  enabled: false
+
+defaultRules:
+  rules:
+    node: false
+    nodeExporterAlerting: false
+    nodeExporterRecording: false
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeProxy:
+  enabled: false

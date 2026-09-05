@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/frontend/base
+labels:
+  - pairs: &devLabels
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/frontend
+    newName: 10.32.11.13:5000/urban-assistant-client
+    digest: sha256:b7cc7dbb6388241c5c15fdb2016b38e02b7f5db17112bd009c719fd7f5bd5101

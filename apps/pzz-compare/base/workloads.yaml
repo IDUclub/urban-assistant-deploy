@@ -1,0 +1,471 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pzz-compare
+  annotations:
+    configmap.reloader.stakater.com/reload: pzz-compare-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pzz-compare
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-compare
+        app.kubernetes.io/component: api
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-runtime-dirs
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec", "mkdir -p /runtime/outputs /runtime/task_inputs /runtime/uploads"]
+          volumeMounts:
+            - name: runtime
+              mountPath: /runtime
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: api
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - python service/wait_for_db.py && exec uvicorn service.app:app --host 0.0.0.0 --port 8000
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          ports:
+            - name: http
+              containerPort: 8000
+          volumeMounts:
+            - name: runtime
+              mountPath: /app/outputs
+              subPath: outputs
+            - name: runtime
+              mountPath: /app/task_inputs
+              subPath: task_inputs
+            - name: runtime
+              mountPath: /app/uploads
+              subPath: uploads
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 120
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: pzz-runtime-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pzz-worker
+  annotations:
+    configmap.reloader.stakater.com/reload: pzz-compare-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pzz-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-worker
+        app.kubernetes.io/component: worker
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-runtime-dirs
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec", "mkdir -p /runtime/outputs /runtime/task_inputs /runtime/uploads"]
+          volumeMounts:
+            - name: runtime
+              mountPath: /runtime
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: worker
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=4 -Q default --loglevel=INFO
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          ports:
+            - name: metrics
+              containerPort: 9100
+          volumeMounts:
+            - name: runtime
+              mountPath: /app/outputs
+              subPath: outputs
+            - name: runtime
+              mountPath: /app/task_inputs
+              subPath: task_inputs
+          readinessProbe:
+            exec:
+              command: ["sh", "-ec", "celery -A service.tasks.celery_app inspect ping -d celery@$HOSTNAME | grep -q pong"]
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: pzz-runtime-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pzz-worker-llm
+  annotations:
+    configmap.reloader.stakater.com/reload: pzz-compare-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pzz-worker-llm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-worker-llm
+        app.kubernetes.io/component: worker-llm
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-runtime-dirs
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec", "mkdir -p /runtime/outputs /runtime/task_inputs /runtime/uploads"]
+          volumeMounts:
+            - name: runtime
+              mountPath: /runtime
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: worker
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=2 -Q llm --loglevel=INFO
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          ports:
+            - name: metrics
+              containerPort: 9100
+          volumeMounts:
+            - name: runtime
+              mountPath: /app/outputs
+              subPath: outputs
+            - name: runtime
+              mountPath: /app/task_inputs
+              subPath: task_inputs
+          readinessProbe:
+            exec:
+              command: ["sh", "-ec", "celery -A service.tasks.celery_app inspect ping -d celery@$HOSTNAME | grep -q pong"]
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: pzz-runtime-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pzz-beat
+  annotations:
+    configmap.reloader.stakater.com/reload: pzz-compare-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pzz-beat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-beat
+        app.kubernetes.io/component: scheduler
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-runtime-dirs
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec", "mkdir -p /runtime/outputs /runtime/task_inputs /runtime/uploads"]
+          volumeMounts:
+            - name: runtime
+              mountPath: /runtime
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: beat
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - python service/wait_for_db.py && exec celery -A service.tasks.celery_app beat --loglevel=INFO --schedule /tmp/celerybeat-schedule
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          volumeMounts:
+            - name: runtime
+              mountPath: /app/outputs
+              subPath: outputs
+            - name: runtime
+              mountPath: /app/task_inputs
+              subPath: task_inputs
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: pzz-runtime-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pzz-mcp
+  annotations:
+    configmap.reloader.stakater.com/reload: pzz-compare-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pzz-mcp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pzz-mcp
+        app.kubernetes.io/component: mcp
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: mcp
+          image: urban-assistant/pzz-compare:base
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "service.mcp_server.main"]
+          envFrom:
+            - configMapRef:
+                name: pzz-compare-config
+            - secretRef:
+                name: pzz-compare-secrets
+          ports:
+            - name: http
+              containerPort: 8765
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-compare
+  labels:
+    app.kubernetes.io/monitor: pzz-compare
+spec:
+  selector:
+    app.kubernetes.io/name: pzz-compare
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-compare-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: pzz-compare
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      nodePort: 31009
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: pzz-mcp
+  ports:
+    - name: http
+      port: 8765
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-mcp-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: pzz-mcp
+  ports:
+    - name: http
+      port: 8765
+      targetPort: http
+      nodePort: 31053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-worker
+  labels:
+    app.kubernetes.io/monitor: pzz-worker
+spec:
+  selector:
+    app.kubernetes.io/name: pzz-worker
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pzz-worker-llm
+  labels:
+    app.kubernetes.io/monitor: pzz-worker-llm
+spec:
+  selector:
+    app.kubernetes.io/name: pzz-worker-llm
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: metrics

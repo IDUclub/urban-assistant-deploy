@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scenarios-conductor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scenarios-conductor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scenarios-conductor
+        app.kubernetes.io/component: worker
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: conductor
+          image: urban-assistant/scenarios-conductor:base
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CONFIG_PATH
+              value: /app/config.yaml
+          ports:
+            - name: metrics
+              containerPort: 9000
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 8Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: config
+          secret:
+            secretName: scenarios-conductor-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scenarios-conductor-metrics
+  labels:
+    app.kubernetes.io/monitor: scenarios-conductor
+spec:
+  selector:
+    app.kubernetes.io/name: scenarios-conductor
+  ports:
+    - name: metrics
+      port: 9000
+      targetPort: metrics

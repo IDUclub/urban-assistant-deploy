@@ -1,0 +1,19 @@
+# Copy this as .github/workflows/kubernetes-release.yaml in each application.
+name: Kubernetes dev release
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    uses: IDUclub/urban-assistant-deploy/.github/workflows/reusable-application-release.yaml@main
+    with:
+      # Replace with the exact key from services.yaml.
+      service: idu-dvd
+      # Replace with the repository's real test command.
+      test-command: python -m pytest
+    secrets: inherit

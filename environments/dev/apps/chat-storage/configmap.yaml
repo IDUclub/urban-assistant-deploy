@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat-storage-config
+data:
+  MONGO_DB: chat_history
+  IDU_MCP_URL: http://gmart-mcp:8000/mcp
+  OBJECTS_EFFECTS_MCP_URL: http://object-effects:8080/effects/mcp
+  DVD_MCP_URL: http://idu-dvd:8000/mcp
+  NORM_GRAPH_MCP_URL: http://normgraph:8020/mcp
+  URBAN_PROJECTS_MCP_URL: http://urban-mcp:8001/mcp/projects/
+  URBAN_TERRITORIES_MCP_URL: http://urban-mcp:8001/mcp/territories/
+  URBAN_PHYSICAL_OBJECTS_MCP_URL: http://urban-mcp:8001/mcp/physical_objects/
+  URBAN_DICTIONARIES_MCP_URL: http://urban-mcp:8001/mcp/dictionaries/
+  URBAN_INDICATORS_MCP_URL: http://urban-mcp:8001/mcp/indicators/
+  URBAN_SOC_GROUPS_MCP_URL: http://urban-mcp:8001/mcp/soc_groups/
+  AUTH_VERIFY: "true"
+  AUTH_CLIENT_ID: chat-storage
+  AUTH_VERIFY_AUD: "false"
+  AUTH_VALID_AUDIENCES: "urban-api, account"
+  SERVICE_AUTH_REALM: IDU
+  SERVICE_AUTH_CLIENT_ID: chat-storage
+  CHATSTORAGE_LOG_DIR: /tmp/chat-storage/logs
+  CHATSTORAGE_LOG_FILE: api.log

@@ -1,0 +1,209 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genplanner
+  annotations:
+    configmap.reloader.stakater.com/reload: genplanner-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: genplanner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: genplanner
+        app.kubernetes.io/component: api
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: api
+          image: urban-assistant/genplanner:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - exec gunicorn --bind 0.0.0.0:8080 --timeout 1000 --workers 1 --worker-class uvicorn.workers.UvicornWorker app.main:app
+          env:
+            - name: APP_ENV
+              value: development
+          envFrom:
+            - secretRef:
+                name: genplanner-secrets
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/genplanner
+          startupProbe:
+            httpGet:
+              path: /docs
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: genplanner-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genplanner-mcp
+  annotations:
+    configmap.reloader.stakater.com/reload: genplanner-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: genplanner-mcp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: genplanner-mcp
+        app.kubernetes.io/component: mcp
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: mcp
+          image: urban-assistant/genplanner:base
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "app.mcp_server.main"]
+          env:
+            - name: APP_ENV
+              value: development
+          envFrom:
+            - secretRef:
+                name: genplanner-secrets
+          ports:
+            - name: http
+              containerPort: 8766
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/genplanner
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: genplanner-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genplanner
+spec:
+  selector:
+    app.kubernetes.io/name: genplanner
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genplanner-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: genplanner
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 31008
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genplanner-mcp
+spec:
+  selector:
+    app.kubernetes.io/name: genplanner-mcp
+  ports:
+    - name: http
+      port: 8766
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genplanner-mcp-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: genplanner-mcp
+  ports:
+    - name: http
+      port: 8766
+      targetPort: http
+      nodePort: 31052

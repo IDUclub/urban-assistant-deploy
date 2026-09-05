@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../root
+patches:
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: Application
+    patch: |-
+      - op: remove
+        path: /spec/syncPolicy/automated
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: ApplicationSet
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/syncPolicy/automated

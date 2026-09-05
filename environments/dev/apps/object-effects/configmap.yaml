@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: object-effects-env-file
+data:
+  .env.development: |
+    LOGS_FILE=/tmp/object-effects/object-effects
+    URBAN_API=http://urban-api:8000
+    MCP_URBAN_API=http://urban-api:8000
+    PROMETHEUS_PORT=9464
+    SERVICE_AUTH_REALM=IDU
+    SERVICE_AUTH_CLIENT_ID=object-effects

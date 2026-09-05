@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/urban-api/base
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/urban-api
+    newName: 10.32.11.13:5000/urban_api
+    digest: sha256:5632c6201b9858547592909a5ba27136b1f9b2529075505176fb9b4368f9e4a4
+  - name: urban-assistant/urban-migrator
+    newName: 10.32.11.13:5000/urban_migrator
+    digest: sha256:d8c29b6416f32d11c50043173d72a3505bbda168e7fe55c6abf417633ea3c190
+patches:
+  - path: migration-wait-patch.yaml

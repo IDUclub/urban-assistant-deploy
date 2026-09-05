@@ -1,0 +1,56 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: schema-registry-schemas
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  topicName: _schemas
+  partitions: 1
+  replicas: 3
+  config:
+    cleanup.policy: compact
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: urban-events
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  topicName: urban.events
+  partitions: 3
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: scenario-events
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  topicName: scenario.events
+  partitions: 3
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: indicator-events
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  topicName: indicator.events
+  partitions: 3
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: document-events
+  labels:
+    strimzi.io/cluster: urban-assistant-kafka
+spec:
+  topicName: document.events
+  partitions: 3
+  replicas: 3

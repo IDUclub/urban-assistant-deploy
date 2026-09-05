@@ -1,0 +1,7 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: urban-assistant-nfs
+parameters:
+  server: ces3.ess
+  share: /gpfs/gpfs0/vmmounts/vmm-dgrachev-k8s

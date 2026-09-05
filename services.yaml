@@ -1,0 +1,163 @@
+apiVersion: deployment.urban-assistant/v1alpha1
+kind: ServiceCatalog
+environment: dev
+namespace: urban-assistant-dev
+registry: 10.32.11.13:5000
+policies:
+  githubSecretBuildKeys:
+    - VITE_KEYCLOAK_AUTH_LOGOUT_REDIRECT
+    - VITE_KEYCLOAK_AUTH_URL
+  vaultOnlyEnvironmentKeys:
+    - A2A_PUBLIC_URL
+    - AUTH_HELPER_URL
+    - AUTH_SERVER_URL
+    - DATABASE_URL
+    - DB_HOST
+    - DVD_AUTH_HELPER_URL
+    - DVD_EMBEDDINGS_URL
+    - DVD_MINIO_ENDPOINT
+    - DVD_OLLAMA_BASE
+    - DVD_QDRANT_URL
+    - DVD_REDIS_URL
+    - DVD_SERVICE_AUTH_SERVER_URL
+    - ECODONUT_API
+    - FILESERVER_ENDPOINT
+    - KEYCLOAK_URL
+    - MONGO_URL
+    - NG_EMBEDDINGS_URL
+    - NG_NEO4J_URI
+    - NG_OLLAMA_BASE
+    - NG_SERVICE_AUTH_SERVER_URL
+    - OLLAMA_API_URL
+    - OLLAMA_BASE_URL
+    - Ollama_API
+    - OPENAI_BASE_URL
+    - PUBLIC_BASE_URL
+    - REDIS_URL
+    - SERVICE_AUTH_SERVER_URL
+    - VECTORIZER_URL
+    - VLLM_BASE_URL
+  allowedSharedVaultPaths:
+    dev/urban-api: [urban-api-config, urban-mcp-config]
+services:
+  - name: frontend
+    source: {repository: Five1Three/Urban-Assistant-Client, branch: dev}
+    argocdPath: environments/dev/apps/frontend
+    healthEndpoint: /
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [frontend]
+    images:
+      - {alias: frontend, kustomizeName: urban-assistant/frontend, repository: 10.32.11.13:5000/urban-assistant-client, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: urban-api
+    source: {repository: IDUclub/idu_api, branch: dev}
+    argocdPath: environments/dev/apps/urban-api
+    healthEndpoint: /health_check/db
+    migration: {job: urban-migrate, imageAlias: migrator, prerequisitePath: environments/dev/prerequisites/urban-api}
+    configRevisionRequired: false
+    atomicImages: [api, migrator]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/urban-api, repository: 10.32.11.13:5000/urban_api, context: ., dockerfile: urban_api/Dockerfile, target: null}
+      - {alias: migrator, kustomizeName: urban-assistant/urban-migrator, repository: 10.32.11.13:5000/urban_migrator, context: ., dockerfile: migrations.Dockerfile, target: null}
+
+  - name: urban-mcp
+    source: {repository: IDUclub/idu_api, branch: dev}
+    argocdPath: environments/dev/apps/urban-mcp
+    healthEndpoint: null
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [mcp]
+    images:
+      - {alias: mcp, kustomizeName: urban-assistant/urban-mcp, repository: 10.32.11.13:5000/urban_mcp, context: ., dockerfile: urban_mcp/Dockerfile, target: null}
+
+  - name: idu-dvd
+    source: {repository: IDUclub/IDU_DVD, branch: dev}
+    argocdPath: environments/dev/apps/idu-dvd
+    healthEndpoint: /ping
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/idu-dvd, repository: 10.32.11.13:5000/idu_dvd, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: normgraph
+    source: {repository: IDUclub/NormGraph, branch: dev}
+    argocdPath: environments/dev/apps/normgraph
+    healthEndpoint: /ping
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/normgraph, repository: 10.32.11.13:5000/normgraph, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: gmart
+    source: {repository: IDUclub/gMART, branch: dev}
+    argocdPath: environments/dev/apps/gmart
+    healthEndpoint: /ping
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [agents, mcp]
+    images:
+      - {alias: agents, kustomizeName: urban-assistant/gmart-agents, repository: 10.32.11.13:5000/idu_agents, context: ., dockerfile: docker/Dockerfile-agents, target: null}
+      - {alias: mcp, kustomizeName: urban-assistant/gmart-mcp, repository: 10.32.11.13:5000/idu_mcp, context: ., dockerfile: docker/Dockerfile-mcp, target: null}
+
+  - name: chat-storage
+    source: {repository: IDUclub/ChatStorage, branch: dev}
+    argocdPath: environments/dev/apps/chat-storage
+    healthEndpoint: /ping
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/chat-storage, repository: 10.32.11.13:5000/chat_storage, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: object-effects
+    source: {repository: IDUclub/ObjectEffectsAPI, branch: dev}
+    argocdPath: environments/dev/apps/object-effects
+    healthEndpoint: /status
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/object-effects, repository: 10.32.11.13:5000/object_effects, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: genbuilder
+    source: {repository: IDUclub/genbuilder_api, branch: dev}
+    argocdPath: environments/dev/apps/genbuilder
+    healthEndpoint: /docs
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/genbuilder, repository: 10.32.11.13:5000/genbuilder, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: genplanner
+    source: {repository: IDUclub/GenPlanner, branch: dev}
+    argocdPath: environments/dev/apps/genplanner
+    healthEndpoint: /docs
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/genplanner, repository: 10.32.11.13:5000/genplanner_api, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: pzz-compare
+    source: {repository: IDUclub/PzzCompareAPI, branch: dev}
+    argocdPath: environments/dev/apps/pzz-compare
+    healthEndpoint: /readiness
+    migration: {job: pzz-migrate, imageAlias: api, prerequisitePath: environments/dev/prerequisites/pzz-compare}
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/pzz-compare, repository: 10.32.11.13:5000/pzz-pipeline, context: ., dockerfile: Dockerfile, target: null}
+
+  - name: scenarios-conductor
+    source: {repository: IDUclub/scenarios_conductor, branch: dev}
+    argocdPath: environments/dev/apps/scenarios-conductor
+    healthEndpoint: /metrics
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/scenarios-conductor, repository: 10.32.11.13:5000/scenarios_conductor, context: ., dockerfile: Dockerfile, target: null}

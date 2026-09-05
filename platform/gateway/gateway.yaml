@@ -1,0 +1,51 @@
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: urban-assistant-gateway-tls
+  namespace: urban-assistant-dev
+spec:
+  vaultAuthRef: urban-assistant-dev
+  mount: urban-assistant-kv
+  type: kv-v2
+  path: dev/gateway
+  refreshAfter: 5m
+  hmacSecretData: true
+  destination:
+    create: true
+    overwrite: false
+    name: urban-assistant-gateway-tls
+    type: kubernetes.io/tls
+    transformation:
+      excludes: [".*"]
+      templates:
+        tls.crt:
+          text: '{{ get .Secrets "tls_crt" }}'
+        tls.key:
+          text: '{{ get .Secrets "tls_key" }}'
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: urban-assistant-dev
+  namespace: urban-assistant-dev
+spec:
+  gatewayClassName: urban-assistant-dev
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: urban-assistant-gateway-tls
+      allowedRoutes:
+        namespaces:
+          from: Same

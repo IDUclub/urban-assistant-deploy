@@ -1,0 +1,151 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-cluster-foundation
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-30"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/cluster
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-vault-integration
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-15"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/platform/vault
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: urban-assistant-dev
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-monitoring-resources
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-10"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/platform/monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-kafka
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-5"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/platform/kafka
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-gateway
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "10"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/platform/gateway
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: urban-assistant-dev
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-urban-api-prerequisites
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-2"}
+spec:
+  project: urban-assistant-apps
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/prerequisites/urban-api
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: urban-assistant-dev
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-pzz-compare-prerequisites
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-2"}
+spec:
+  project: urban-assistant-apps
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: environments/dev/prerequisites/pzz-compare
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: urban-assistant-dev
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "-20"}
+spec:
+  project: urban-assistant-platform
+  source:
+    repoURL: https://github.com/IDUclub/urban-assistant-deploy.git
+    targetRevision: main
+    path: operators/metrics-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated: {enabled: true, prune: true, selfHeal: true, allowEmpty: false}
+    syncOptions: [ApplyOutOfSyncOnly=true, ServerSideApply=true]

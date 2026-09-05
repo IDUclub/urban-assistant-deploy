@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urban-api
+  labels:
+    app.kubernetes.io/name: urban-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: urban-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: urban-api
+        app.kubernetes.io/component: api
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: api
+          image: urban-assistant/urban-api:base
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CONFIG_PATH
+              value: /app/config.yaml
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: metrics
+              containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /health_check/ping
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health_check/db
+              port: http
+            failureThreshold: 6
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health_check/ping
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 6Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: config
+          secret:
+            secretName: urban-api-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urban-api
+  labels:
+    app.kubernetes.io/name: urban-api
+    app.kubernetes.io/monitor: urban-api
+spec:
+  selector:
+    app.kubernetes.io/name: urban-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+---
+# Reachable only through the corporate network/VPN and its firewall rules.
+apiVersion: v1
+kind: Service
+metadata:
+  name: urban-api-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: urban-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      nodePort: 31001

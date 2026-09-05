@@ -5,6 +5,10 @@ metadata:
   namespace: argocd
   annotations: {argocd.argoproj.io/sync-wave: "-25"}
 spec:
+  syncPolicy:
+    # Removing a generator entry must not cascade-delete an already running
+    # operator. Resource cleanup is always an explicit reviewed operation.
+    preserveResourcesOnDeletion: true
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:

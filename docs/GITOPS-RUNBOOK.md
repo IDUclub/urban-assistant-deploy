@@ -20,15 +20,18 @@ auto-merge. Create the `automated` and `environment/dev` labels. Ensure the
 visible `@IDUclub/platform` team exists with write access, or replace it with
 the actual platform team before enabling required CODEOWNERS review.
 
-Create a GitHub App named `deploy-bot` and install it only on the deploy and
-allowlisted application repositories. On the deploy repository grant Contents
-and Pull requests read/write; on application repositories grant Contents
-read-only. Store `DEPLOY_BOT_APP_ID` and `DEPLOY_BOT_PRIVATE_KEY` as protected
-repository or organization secrets. The App private key is never copied to the
-runner filesystem outside a job.
+Create a GitHub App named `deploy-bot`, grant Contents and Pull requests
+read/write, and install it only on the deploy repository. Store
+`DEPLOY_BOT_APP_ID` and `DEPLOY_BOT_PRIVATE_KEY` as protected repository or
+organization secrets available to the deploy and allowlisted application
+repositories. The App private key is never copied to the runner filesystem
+outside a job.
 
-Configure a separate read-only GitHub App or deploy key for Argo CD. Do not reuse
-the deploy-bot write credential.
+Create a second GitHub App named `git-reader` with Contents read-only and install
+it on the deploy and allowlisted application repositories. Store
+`SOURCE_READER_APP_ID` and `SOURCE_READER_PRIVATE_KEY` in the deploy repository
+for stale-source checks. Generate a separate private key for Argo CD; do not
+reuse the deploy-bot write credential.
 
 ## 2. Prepare the registry runner
 
@@ -120,16 +123,17 @@ The server must remain `ClusterIP`. For local access over VPN:
 kubectl port-forward -n argocd svc/argocd-server 8080:443
 ```
 
-Add the read-only deploy-repository credential with the Argo CD CLI while the
-port-forward is active. Supply the token interactively or through a protected
-shell variable; never paste it into YAML or shell history:
+Add the read-only deploy-repository credential with Argo CD's native GitHub App
+authentication while the port-forward is active. Keep the private key file in a
+temporary protected location and remove the local copy after the connection is
+verified:
 
 ```bash
 argocd repo add https://github.com/IDUclub/urban-assistant-deploy.git \
-  --username x-access-token \
-  --password "$ARGOCD_REPOSITORY_READ_TOKEN"
+  --github-app-id <GIT_READER_APP_ID> \
+  --github-app-installation-id <INSTALLATION_ID> \
+  --github-app-private-key-path <PATH_TO_PRIVATE_KEY>
 argocd repo get https://github.com/IDUclub/urban-assistant-deploy.git
-unset ARGOCD_REPOSITORY_READ_TOKEN
 ```
 
 ## 7. Start in adoption mode

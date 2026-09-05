@@ -40,8 +40,8 @@ jobs:
         id: source-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.DEPLOY_BOT_APP_ID }}
-          private-key: ${{ secrets.DEPLOY_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.SOURCE_READER_APP_ID }}
+          private-key: ${{ secrets.SOURCE_READER_PRIVATE_KEY }}
           owner: ${{ steps.promotion.outputs.source_owner }}
           repositories: ${{ steps.promotion.outputs.source_name }}
 

@@ -122,8 +122,12 @@ Use two separate identities:
 
 - `deploy-bot` GitHub App: contents/PR write only in this repository and
   repository-dispatch access from allowlisted application repositories;
-- a read-only GitHub App installation token or deploy key used only by Argo CD
-  to clone this repository.
+- `git-reader` GitHub App: contents read-only in this repository and allowlisted
+  application repositories, used for stale-source checks and by Argo CD.
+
+The deploy repository stores `SOURCE_READER_APP_ID` and
+`SOURCE_READER_PRIVATE_KEY` as protected Actions secrets. Argo CD uses a
+separate private key generated for the same read-only App.
 
 The registry build runner uses the `13_runner` label. It must have registry
 connectivity but no kubeconfig,

@@ -3,6 +3,8 @@ kind: AppProject
 metadata:
   name: urban-assistant-apps
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"
 spec:
   description: Namespaced Urban Assistant application workloads
   sourceRepos:
@@ -20,6 +22,8 @@ kind: AppProject
 metadata:
   name: urban-assistant-platform
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"
 spec:
   description: Reviewed cluster foundation, operators and shared platform
   sourceRepos:

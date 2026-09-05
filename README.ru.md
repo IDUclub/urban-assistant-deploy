@@ -346,7 +346,8 @@ Registry jobs используют runner label `13_runner`. На runner не д
 - защитить `main`, требовать PR и check `Validate desired state`;
 - создать labels `automated` и `environment/dev`;
 - создать GitHub App `deploy-bot` с минимальной записью в deploy-репозиторий;
-- выдать Argo CD отдельный read-only GitHub credential;
+- создать read-only GitHub App `git-reader` для проверки исходных веток и
+  доступа Argo CD к Git;
 - заполнить все keys из `vault-contract.yaml` в Vault;
 - добавить frontend secrets `MAPBOX_PUBLIC_TOKEN`,
   `FRONTEND_KEYCLOAK_AUTH_URL` и `FRONTEND_KEYCLOAK_LOGOUT_REDIRECT`;

@@ -15,3 +15,9 @@ controller:
       limits:
         cpu: 300m
         memory: 256Mi
+
+# Argo CD applies the CRDs from the chart directly. A Helm pre-upgrade hook
+# would be translated to a PreSync hook and run during every GitOps adoption.
+hooks:
+  upgradeCRDs:
+    enabled: false

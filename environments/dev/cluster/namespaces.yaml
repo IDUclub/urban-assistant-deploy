@@ -21,27 +21,3 @@ metadata:
   labels:
     app.kubernetes.io/part-of: urban-assistant
     environment: dev
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: vault-secrets-operator
-  labels:
-    app.kubernetes.io/part-of: urban-assistant
-    environment: dev
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: envoy-gateway-system
-  labels:
-    app.kubernetes.io/part-of: urban-assistant
-    environment: dev
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argocd
-  labels:
-    app.kubernetes.io/part-of: urban-assistant
-    environment: dev

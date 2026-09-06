@@ -1,35 +1,11 @@
-# Machine-readable desired state consumed by the Argo CD operator ApplicationSet.
-bootstrapRelease:
-  name: argocd
-  namespace: argocd
-  repository: https://argoproj.github.io/argo-helm
-  chart: argo-cd
-  chartVersion: 10.4.1
-  appVersion: v3.5.2
-  values: argocd/bootstrap/values.yaml
-
+# Urban Assistant-scoped releases consumed by the operator ApplicationSet.
 helmReleases:
-  - name: csi-driver-nfs
-    namespace: kube-system
-    repository: https://kubernetes-csi.github.io/csi-driver-nfs
-    chart: csi-driver-nfs
-    version: 4.13.4
-    values: operators/csi-driver-nfs-values.yaml
   - name: strimzi-cluster-operator
     namespace: kafka
     repository: https://strimzi.io/charts/
     chart: strimzi-kafka-operator
     version: 1.1.0
     values: operators/strimzi-values.yaml
-  - name: vault-secrets-operator
-    namespace: vault-secrets-operator
-    repository: https://helm.releases.hashicorp.com
-    chart: vault-secrets-operator
-    version: 1.5.0
-    values: operators/vault-secrets-operator/values-urban-assistant.yaml
-    vendoredPath: operators/vault-secrets-operator
-    vendoredValues: values-urban-assistant.yaml
-    upstreamDigest: sha256:4f822615d9346fd4f8b96b8852cc44c83042a2f1511515e2631ec2fd1da03d80
   - name: kube-prometheus-stack
     namespace: monitoring
     repository: https://prometheus-community.github.io/helm-charts
@@ -48,22 +24,9 @@ helmReleases:
     chart: opentelemetry-collector
     version: 0.165.0
     values: operators/otel-collector-values.yaml
-  - name: envoy-gateway
-    namespace: envoy-gateway-system
-    repository: registry-1.docker.io/envoyproxy
-    chart: gateway-helm
-    version: v1.8.3
-    values: operators/envoy-gateway-values.yaml
   - name: reloader
     namespace: urban-assistant-dev
     repository: https://stakater.github.io/stakater-charts
     chart: reloader
     version: 2.2.12
     values: operators/reloader-values.yaml
-
-manifestAddons:
-  - name: metrics-server
-    namespace: kube-system
-    version: v0.9.0
-    source: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.0/components.yaml
-    patch: operators/metrics-server/patch.yaml

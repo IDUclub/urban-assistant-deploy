@@ -37,9 +37,8 @@ environments/dev/apps/<service>/     dev config, endpoints and image digests
 environments/dev/prerequisites/      Vault secrets, Redis and PVC prerequisites
 environments/dev/platform/           dev platform overlays
 environments/prod/                   inactive production skeleton
-cluster/ and platform/               shared cluster/platform resources
-operators/                           pinned Helm releases and values
-argocd/bootstrap/                    one-time chart values and root Application
+cluster/ and platform/               Urban Assistant platform resources
+operators/                           Urban Assistant-scoped Helm releases
 argocd/adoption/                     manual sync, no automated prune
 argocd/root/                         steady-state auto-sync/self-heal/prune
 scripts/                              render, validation and promotion helpers
@@ -48,8 +47,11 @@ services.yaml                         machine-readable delivery allowlist
 vault-contract.yaml                   complete required Vault keys by path
 ```
 
-Shared cluster administration tools that are not specific to Urban Assistant,
-such as Headlamp, are intentionally outside this repository's ownership.
+Argo CD itself and shared cluster controllers such as Metrics Server, NFS CSI,
+Vault Secrets Operator and Envoy Gateway are intentionally outside this
+repository's ownership. This repository contains only the Argo CD projects and
+Applications that deploy Urban Assistant. Shared administration tools such as
+Headlamp are outside its ownership as well.
 
 The complete dev render is deterministic and needs no `.env` file:
 
@@ -95,22 +97,15 @@ Vault bootstrap address into Vault would create a circular dependency.
 
 ## Argo CD
 
-The pinned bootstrap release is Helm chart `argo-cd 10.4.1`, application
-`v3.5.2`. `scripts/bootstrap-argocd.sh` refuses Kubernetes older than 1.25.
-The current cluster baseline is validated against Kubernetes `1.36.3`.
-
-Argo CD's server remains `ClusterIP`; use VPN plus port-forward:
-
-```bash
-kubectl port-forward -n argocd svc/argocd-server 8080:443
-```
+Argo CD and the shared cluster controllers are prerequisites managed by the
+cluster owner. Their installation, versions and external access configuration
+do not live in this application deployment repository.
 
 An ApplicationSet creates one Application per service. Separate Applications
-own cluster foundation, operators, Vault integration, monitoring, Kafka,
-Gateway and migration prerequisites. Operator Applications are generated from
-`operators/releases.yaml`. Most use upstream charts plus values from this Git
-repository via multiple sources. The Vault Secrets Operator chart is pinned and
-vendored in Git because the cluster cannot reach HashiCorp's Helm repository.
+own the Urban Assistant foundation, scoped dependencies, Vault integration,
+monitoring, Kafka, Gateway and migration prerequisites. The release entries in
+`operators/releases.yaml` are limited to components configured exclusively for
+Urban Assistant, currently Strimzi, its observability stack and Reloader.
 
 Urban API and PZZ migrations are `PreSync` hooks with
 `BeforeHookCreation,HookSucceeded`, bounded retries and deadlines. A failed hook
@@ -118,7 +113,7 @@ blocks the Deployment sync, so old pods stay active. Reverting Git restores an
 old image digest but never attempts a database downgrade; migrations must remain
 backward-compatible and idempotent.
 
-See [docs/GITOPS-RUNBOOK.md](docs/GITOPS-RUNBOOK.md) for bootstrap and adoption.
+See [docs/GITOPS-RUNBOOK.md](docs/GITOPS-RUNBOOK.md) for attachment and adoption.
 
 ## GitHub identities and runners
 
@@ -174,6 +169,7 @@ The established NodePort groups remain:
 | `31300-31399` | Gateway/edge |
 
 Current fixed ports are enforced by the rendered-manifest uniqueness check.
+`31102` is reserved outside this repository for the cluster-owned Argo CD UI.
 
 ## Production policy
 

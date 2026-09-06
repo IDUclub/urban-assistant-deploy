@@ -1,8 +1,9 @@
 # GitOps bootstrap and adoption runbook
 
-This runbook intentionally separates one-time cluster bootstrap from steady
-state. Run Kubernetes commands only from the control plane with the intended
-kubeconfig. Stop on every failed check.
+This runbook covers attaching Urban Assistant to an existing Argo CD instance
+and adopting its resources. Argo CD itself and cluster-wide controllers are
+managed separately by the cluster owner. Run Kubernetes commands only from the
+control plane with the intended kubeconfig. Stop on every failed check.
 
 ## 1. Publish and protect the repository
 
@@ -97,36 +98,30 @@ python3 -m unittest discover -s tests -v
 If `kubeconform` is installed, `scripts/validate.sh` also checks Kubernetes
 1.36.3 and the pinned CRD schema snapshots.
 
-## 6. Install Argo CD once
+## 6. Verify cluster prerequisites
 
 On the control plane:
 
 ```bash
-export KUBECONFIG="$HOME/.kube/urban-assistant-admin.conf"
+export KUBECONFIG=<cluster-admin-kubeconfig>
 kubectl config current-context
 kubectl version -o json | jq '.serverVersion.gitVersion'
-./scripts/bootstrap-argocd.sh
-```
-
-The script aborts below Kubernetes 1.25 and installs chart `10.4.1` (Argo CD
-`v3.5.2`). Verify the chart-reported app version and pods:
-
-```bash
 helm status argocd -n argocd
 kubectl get pods -n argocd
 kubectl get svc argocd-server -n argocd
+kubectl get deployment metrics-server -n kube-system
+kubectl get deployment vault-secrets-operator-controller-manager \
+  -n vault-secrets-operator
+kubectl get deployment envoy-gateway -n envoy-gateway-system
 ```
 
-The server must remain `ClusterIP`. For local access over VPN:
-
-```bash
-kubectl port-forward -n argocd svc/argocd-server 8080:443
-```
+Do not continue until Argo CD, Metrics Server, NFS CSI, Vault Secrets Operator
+and Envoy Gateway are healthy. Their versions and external access are cluster
+infrastructure concerns, not desired state in this repository.
 
 Add the read-only deploy-repository credential with Argo CD's native GitHub App
-authentication while the port-forward is active. Keep the private key file in a
-temporary protected location and remove the local copy after the connection is
-verified:
+authentication. Keep the private key file in a temporary protected location
+and remove the local copy after the connection is verified:
 
 ```bash
 argocd repo add https://github.com/IDUclub/urban-assistant-deploy.git \
@@ -138,11 +133,13 @@ argocd repo get https://github.com/IDUclub/urban-assistant-deploy.git
 
 ## 7. Start in adoption mode
 
-The bootstrap Application initially points to `argocd/adoption`, which removes
-automated sync and prune from every generated Application:
+The cluster-owned root Application initially points to `argocd/adoption`, which
+removes automated sync and prune from every generated Application. Apply its
+manifest from the cluster infrastructure bundle:
 
 ```bash
-kubectl apply -f argocd/bootstrap/root-application.yaml
+kubectl apply --server-side --force-conflicts \
+  -f <cluster-infra-dir>/argocd/urban-assistant-root-application.yaml
 argocd app diff urban-assistant-bootstrap
 argocd app sync urban-assistant-bootstrap
 argocd app list
@@ -151,21 +148,15 @@ argocd app list
 Adopt in this order, always reviewing `argocd app diff` before `argocd app sync`
 and never adding `--prune`:
 
-1. operator Applications and `dev-cluster-foundation`;
+1. Urban Assistant-scoped component Applications and `dev-cluster-foundation`;
 2. `dev-vault-integration`, then confirm `VaultAuth` and generated Secrets;
 3. monitoring, Kafka and Gateway Applications;
 4. `dev-urban-api-prerequisites` and `dev-pzz-compare-prerequisites`;
 5. application Applications one at a time.
 
-The Vault Secrets Operator chart is vendored under
-`operators/vault-secrets-operator` because the cluster cannot reach HashiCorp's
-Helm repository. Verify the recorded upstream digest before upgrading it; Argo
-CD renders the vendored chart directly from this Git repository.
-
-Headlamp is a shared cluster administration tool and remains outside this
-repository. Before removing any previously generated Headlamp Application,
-clear its Argo CD resource finalizer and remove this repository's tracking
-annotation from the `headlamp` Namespace so the shared installation is kept.
+Cluster-wide controllers and administration tools, including Headlamp, remain
+outside this repository. Their resources must not be added to an Urban
+Assistant Application merely to make them visible in Argo CD.
 
 For Urban API and PZZ, first inspect the existing migration Jobs and database
 backup state. Do not sync their Applications until a repeated forward migration
@@ -181,13 +172,13 @@ deletion in Git must not be pruned during this phase.
 
 ## 8. Enable steady state
 
-After every Application has passed deploy and rollback acceptance, change
-`argocd/bootstrap/root-application.yaml` from `path: argocd/adoption` to
-`path: argocd/root` in a reviewed PR. Apply that bootstrap file once and sync
-the root Application:
+After every Application has passed deploy and rollback acceptance, change the
+cluster-owned root Application from `path: argocd/adoption` to
+`path: argocd/root`, apply it once and sync the root Application:
 
 ```bash
-kubectl apply -f argocd/bootstrap/root-application.yaml
+kubectl apply --server-side --force-conflicts \
+  -f <cluster-infra-dir>/argocd/urban-assistant-root-application.yaml
 argocd app sync urban-assistant-bootstrap
 argocd app list
 ```

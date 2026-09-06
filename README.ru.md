@@ -59,11 +59,10 @@ digests обновляются одним PR. Частично обновить 
 | `apps/<service>/base/` | Нейтральные Deployment, Service, Job, PVC и monitoring-ресурсы | Когда меняется общая для всех окружений модель приложения |
 | `environments/dev/apps/<service>/` | Dev ConfigMap, endpoints, ресурсы и точные image digests | Когда меняется только dev-конфигурация или версия образа |
 | `environments/dev/prerequisites/` | Vault secrets, Redis и PVC, которые должны существовать до приложения | При изменении предварительных зависимостей Urban API и PZZ |
-| `cluster/` | Кластерные ресурсы, например StorageClass | Для изменений уровня Kubernetes-кластера |
+| `cluster/` | Ресурсы платформы Urban Assistant, например её StorageClass | Для изменений платформенной инфраструктуры приложения |
 | `platform/` | Общие Kafka, Vault, Gateway и monitoring-ресурсы | Для общей инфраструктуры платформы |
 | `environments/dev/platform/` | Dev-патчи платформенных ресурсов | Для адресов и параметров платформы, специфичных для dev |
-| `operators/` | `releases.yaml` и values зафиксированных Helm-релизов | Для добавления или обновления операторов |
-| `argocd/bootstrap/` | Однократная установка и корневое Argo Application | При bootstrap или переключении adoption/steady state |
+| `operators/` | `releases.yaml` и values компонентов, ограниченных Urban Assistant | Для обновления прикладных зависимостей платформы |
 | `argocd/adoption/` | Ручная синхронизация без auto-sync и prune | Только во время первоначального усыновления ресурсов |
 | `argocd/root/` | Рабочие AppProject, Application и ApplicationSet | Для постоянного GitOps-управления |
 | `services.yaml` | Машиночитаемый контракт между приложениями и deploy-репозиторием | При добавлении сервиса, image или изменении build-контракта |
@@ -73,8 +72,11 @@ digests обновляются одним PR. Частично обновить 
 | `scripts/` | Рендер, проверки, promotion и операционные helpers | При изменении автоматизации |
 | `tests/` | Unit-тесты контракта обновления image | Вместе с изменениями `update-image.py` |
 
-Общие средства администрирования Kubernetes, не относящиеся непосредственно к
-Urban Assistant, например Headlamp, намеренно не управляются этим репозиторием.
+Сам Argo CD и общекластерные контроллеры Metrics Server, NFS CSI, Vault Secrets
+Operator и Envoy Gateway намеренно не управляются этим репозиторием. Здесь
+остаются только Argo CD Projects и Applications, которые разворачивают Urban
+Assistant. Общие средства администрирования, например Headlamp, также находятся
+вне зоны ответственности репозитория.
 
 ### Base и overlay
 
@@ -123,28 +125,24 @@ build context, image alias и список `atomicImages`: этот файл и�
 
 ## Argo CD
 
-Bootstrap использует Helm chart `argo-cd 10.4.1` и Argo CD `v3.5.2`.
-`scripts/bootstrap-argocd.sh` останавливается, если версия Kubernetes ниже
-1.25. UI остаётся `ClusterIP`; штатный доступ — через VPN и port-forward:
-
-```bash
-kubectl port-forward -n argocd svc/argocd-server 8080:443
-```
+Установка Argo CD, его версия, внешний UI и общекластерные контроллеры — внешние
+предпосылки, которыми управляет владелец Kubernetes-кластера. В этом репозитории
+находятся только настройки доставки Urban Assistant через уже работающий Argo
+CD.
 
 `argocd/root/applicationset-apps.yaml` автоматически создаёт отдельное Argo
 Application для каждого каталога `environments/dev/apps/*`. Поэтому сбой или
 rollout одного сервиса не объединяется с rollout остальных. Отдельные
-Applications управляют cluster foundation, operators, Vault integration,
-monitoring, Kafka, Gateway и prerequisites.
+Applications управляют foundation Urban Assistant, его зависимостями, Vault
+integration, monitoring, Kafka, Gateway и prerequisites.
 
-Операторы генерируются из `operators/releases.yaml`. Большинство Helm charts
-загружаются из upstream repository, а values читаются из этого Git-репозитория
-через Argo CD multiple sources. Chart Vault Secrets Operator зафиксирован и
-хранится в Git, потому что кластер не имеет доступа к Helm repository HashiCorp.
+Записи в `operators/releases.yaml` относятся только к компонентам, настроенным
+исключительно для Urban Assistant: Strimzi, observability stack и Reloader.
+Общекластерные операторы устанавливаются вне этого репозитория.
 
 ### Adoption и steady state
 
-Изначально `argocd/bootstrap/root-application.yaml` указывает на
+При первоначальном подключении корневое Application указывает на
 `argocd/adoption`. В этом режиме Applications создаются без автоматического
 sync и prune. Каждый компонент сначала сравнивается с живым кластером и
 усыновляется вручную.
@@ -296,9 +294,9 @@ deploy: это создаёт drift вне Git.
 ApplicationSet обнаружит новый dev overlay автоматически; отдельный Argo
 Application вручную обычно не нужен.
 
-### Обновить Helm-оператор
+### Обновить Helm-компонент Urban Assistant
 
-1. Изменить версию chart в `operators/releases.yaml`.
+1. Изменить версию прикладного chart в `operators/releases.yaml`.
 2. При необходимости обновить соответствующий values-файл.
 3. Проверить changelog, CRD compatibility и render.
 4. Во время adoption выполнить ручной diff/sync без prune.
@@ -326,7 +324,6 @@ git revert <deploy-commit>
 | `export-build-contract.py` | Выдаёт build matrix одного сервиса reusable workflow |
 | `verify-registry-digests.sh` | Проверяет существование переданных digests в registry |
 | `render-frontend-env.sh` | Формирует контролируемый frontend `service.env` во время build |
-| `bootstrap-argocd.sh` | Проверяет Kubernetes и устанавливает зафиксированный Argo CD chart |
 | `adoption-diff.sh` | Выполняет read-only `kubectl diff -k` для выбранного target |
 | `compare-rendered.py` | Сравнивает identity и критичные поля двух render-файлов |
 
@@ -357,7 +354,7 @@ Registry jobs используют runner label `13_runner`. На runner не д
   `FRONTEND_KEYCLOAK_AUTH_URL` и `FRONTEND_KEYCLOAK_LOGOUT_REDIRECT`;
 - подготовить self-hosted registry runner;
 - добавить caller workflow в каждый репозиторий приложения;
-- установить Argo CD и выполнить adoption по компонентам без prune;
+- проверить общекластерные зависимости и выполнить adoption по компонентам без prune;
 - только после проверки GitOps deploy и rollback отключать старый Compose job.
 
 Полная последовательность bootstrap и adoption описана в
@@ -377,6 +374,8 @@ Registry jobs используют runner label `13_runner`. На runner не д
 | `31300-31399` | Gateway и edge |
 
 Уникальность текущих фиксированных портов проверяется на полном render.
+Порт `31102` зарезервирован вне этого репозитория для общекластерного UI Argo
+CD.
 
 ## Production
 

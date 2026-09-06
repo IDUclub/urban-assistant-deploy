@@ -6,8 +6,8 @@ metadata:
   annotations: {argocd.argoproj.io/sync-wave: "-25"}
 spec:
   syncPolicy:
-    # Removing a generator entry must not cascade-delete an already running
-    # operator. Resource cleanup is always an explicit reviewed operation.
+    # This ApplicationSet owns only components scoped to Urban Assistant.
+    # Removing an entry must not cascade-delete an already running component.
     preserveResourcesOnDeletion: true
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]

@@ -5,10 +5,16 @@ metadata:
   namespace: urban-assistant-dev
 spec:
   parentRefs:
-    - name: urban-assistant-dev
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: urban-assistant-dev
       sectionName: http
   rules:
-    - filters:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
@@ -22,7 +28,9 @@ metadata:
   namespace: urban-assistant-dev
 spec:
   parentRefs:
-    - name: urban-assistant-dev
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: urban-assistant-dev
       sectionName: https
   rules:
     - matches:
@@ -36,8 +44,11 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /api/v1
       backendRefs:
-        - name: urban-api
+        - group: ""
+          kind: Service
+          name: urban-api
           port: 8000
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
@@ -49,8 +60,11 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        - name: gmart
+        - group: ""
+          kind: Service
+          name: gmart
           port: 8080
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
@@ -62,8 +76,11 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /api/v1
       backendRefs:
-        - name: chat-storage
+        - group: ""
+          kind: Service
+          name: chat-storage
           port: 8000
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
@@ -75,15 +92,21 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        - name: pzz-compare
+        - group: ""
+          kind: Service
+          name: pzz-compare
           port: 8000
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: urban-assistant-frontend
+        - group: ""
+          kind: Service
+          name: urban-assistant-frontend
           port: 3000
+          weight: 1
 ---
 # gMART and PZZ use long-lived SSE responses; Envoy's default is 15 seconds.
 apiVersion: gateway.envoyproxy.io/v1alpha1

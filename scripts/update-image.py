@@ -23,6 +23,13 @@ class PromotionError(ValueError):
     pass
 
 
+class IndentedSafeDumper(yaml.SafeDumper):
+    """Render block sequences indented beneath their mapping keys."""
+
+    def increase_indent(self, flow: bool = False, indentless: bool = False):
+        return super().increase_indent(flow, indentless=False)
+
+
 def load_yaml(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         value = yaml.safe_load(stream)
@@ -125,7 +132,13 @@ def update_overlay(root: Path, service: dict[str, Any], images: list[dict[str, s
     if payload.get("config_revision"):
         annotations["deployment.urban-assistant/config-revision"] = payload["config_revision"]
 
-    serialized = yaml.safe_dump(document, sort_keys=False, allow_unicode=True, width=120)
+    serialized = yaml.dump(
+        document,
+        Dumper=IndentedSafeDumper,
+        sort_keys=False,
+        allow_unicode=True,
+        width=120,
+    )
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", dir=overlay.parent, delete=False) as stream:
         stream.write(serialized)
         temporary = Path(stream.name)

@@ -101,8 +101,35 @@ jobs:
 
       - name: Enable squash auto-merge
         if: steps.pull-request.outputs.pull-request-number != ''
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ steps.deploy-token.outputs.token }}
-          pull-request-number: ${{ steps.pull-request.outputs.pull-request-number }}
-          merge-method: squash
+        env:
+          GH_TOKEN: ${{ steps.deploy-token.outputs.token }}
+          PULL_REQUEST_NUMBER: ${{ steps.pull-request.outputs.pull-request-number }}
+        run: |
+          pull_request="$(curl --silent --show-error --fail --retry 3 \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/IDUclub/urban-assistant-deploy/pulls/${PULL_REQUEST_NUMBER}")"
+          pull_request_id="$(jq -er '.node_id' <<<"${pull_request}")"
+
+          query='mutation EnableAutoMerge($pullRequestId: ID!) {
+            enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId, mergeMethod: SQUASH}) {
+              pullRequest { number }
+            }
+          }'
+          request="$(jq -cn \
+            --arg query "${query}" \
+            --arg pullRequestId "${pull_request_id}" \
+            '{query: $query, variables: {pullRequestId: $pullRequestId}}')"
+          response="$(curl --silent --show-error --fail --retry 3 \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            --data "${request}" \
+            'https://api.github.com/graphql')"
+
+          if ! jq -e \
+            '.errors == null and .data.enablePullRequestAutoMerge.pullRequest.number != null' \
+            >/dev/null <<<"${response}"; then
+            jq -c '{errors, data}' <<<"${response}" >&2
+            exit 1
+          fi

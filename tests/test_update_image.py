@@ -68,6 +68,9 @@ class UpdateImageTests(unittest.TestCase):
         self.assertEqual(result["images"][0]["digest"], "sha256:" + "1" * 64)
         self.assertEqual(result["images"][1]["digest"], "sha256:" + "2" * 64)
         self.assertEqual(result["commonAnnotations"]["deployment.urban-assistant/source-revision"], "a" * 40)
+        rendered = path.read_text(encoding="utf-8")
+        self.assertIn("resources:\n  - base\n", rendered)
+        self.assertIn("images:\n  - name: logical/api\n", rendered)
 
     def test_rejects_partial_atomic_release(self) -> None:
         self.payload["images"].pop()

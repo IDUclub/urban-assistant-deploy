@@ -39,10 +39,10 @@ reuse the deploy-bot write credential.
 Register an existing Linux runner with this label:
 
 ```text
-13_runner
+47_runner
 ```
 
-It needs Docker Buildx, `bash`, `curl`, `jq`, `gh`, Python 3.12 and network
+It needs Docker Buildx, `bash`, `curl`, `jq`, Python 3.12 and network
 access to the current registry. It must not contain a kubeconfig, Vault token,
 control-plane SSH key or cluster-admin credential. Restrict it to protected
 `dev` push workflows in trusted repositories. Create a `dev-build` GitHub
@@ -53,8 +53,16 @@ there; restrict the runner group to the allowlisted application repositories.
 
 In each application repository copy `ci-templates/application-caller.yaml` to
 `.github/workflows/kubernetes-release.yaml`, set the service key and its actual
-test command, and keep the existing Compose workflow during adoption. The
-workflow must trigger on a successful push to protected branch `dev`.
+test script, and keep the existing Compose workflow during adoption. The test
+script must install its dependencies and run the required suite. The template
+fails closed until this placeholder is replaced. The workflow must trigger on a
+successful push to protected branch `dev`.
+
+Every backend repository must have the same protected release branch named
+`dev`. Create it from that repository's current integration branch before
+installing the caller. Do not point the Kubernetes release workflow at `main`,
+`master` or `develop`; both the reusable workflow and the promotion workflow
+reject those refs.
 
 Before enabling it, verify Dockerfile and target values in `services.yaml`.
 `idu_api` uses separate release contracts for `urban-api` (API plus migrator)

@@ -29,7 +29,9 @@ def main() -> int:
     event_name = os.environ.get("GITHUB_EVENT_NAME", "")
     if repository != service["source"]["repository"]:
         raise SystemExit(f"service {args.service} cannot be built from {repository}")
-    if ref_name != service["source"]["branch"] or event_name != "push":
+    if service["source"].get("branch") != "dev":
+        raise SystemExit("service catalog must require the dev branch")
+    if ref_name != "dev" or event_name != "push":
         raise SystemExit("Kubernetes releases are allowed only for push events on the protected dev branch")
 
     images = service["images"]

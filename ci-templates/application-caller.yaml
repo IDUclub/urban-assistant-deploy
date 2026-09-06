@@ -14,6 +14,10 @@ jobs:
     with:
       # Replace with the exact key from services.yaml.
       service: idu-dvd
-      # Replace with the repository's real test command.
-      test-command: python -m pytest
+      # Required: replace this fail-closed placeholder with dependency setup
+      # and the repository's real test suite. The image build never starts
+      # unless this script succeeds.
+      test-command: |
+        echo "Configure dependency installation and tests for this repository" >&2
+        exit 1
     secrets: inherit

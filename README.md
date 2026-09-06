@@ -128,7 +128,7 @@ The deploy repository stores `SOURCE_READER_APP_ID` and
 `SOURCE_READER_PRIVATE_KEY` as protected Actions secrets. Argo CD uses a
 separate private key generated for the same read-only App.
 
-The registry build runner uses the `13_runner` label. It must have registry
+The registry build runner uses the `47_runner` label. It must have registry
 connectivity but no kubeconfig,
 Vault token or SSH key for the control plane. Prefer an ephemeral runner;
 otherwise use a dedicated VM with cleanup between jobs.
@@ -137,7 +137,13 @@ Application repositories call
 `.github/workflows/reusable-application-release.yaml` from a separate workflow
 triggered by pushes to `dev`. The reusable workflow reads its build matrix from
 `services.yaml`, runs tests first, publishes immutable images and dispatches one
-atomic event. `ci-templates/application-caller.yaml` is the starting caller.
+atomic event. `ci-templates/application-caller.yaml` is the starting caller. Its
+test placeholder intentionally fails until the application supplies a script
+that installs dependencies and runs the required suite.
+
+Every backend repository uses the protected branch name `dev`. Pushes from
+`main`, `master`, `develop` and feature branches are rejected by the release
+contract.
 
 ## Required branch checks
 

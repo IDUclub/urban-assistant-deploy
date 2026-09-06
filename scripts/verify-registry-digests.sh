@@ -21,7 +21,7 @@ while IFS=$'\t' read -r repository digest; do
     exit 1
   fi
   curl "${curl_args[@]}" \
-    -H 'Accept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json' \
+    -H 'Accept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json' \
     "${registry_scheme}://${registry}/v2/${image_path}/manifests/${digest}" >/dev/null
   echo "Verified ${repository}@${digest}"
 done < <(jq -r '.images[] | [.repository, .digest] | @tsv' <<<"${PAYLOAD_JSON}")

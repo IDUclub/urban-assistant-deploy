@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   promote:
-    runs-on: 13_runner
+    runs-on: 47_runner
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +47,16 @@ jobs:
 
       - name: Reject stale builds
         env:
-          GH_TOKEN: ${{ steps.source-token.outputs.token }}
+          SOURCE_TOKEN: ${{ steps.source-token.outputs.token }}
           SOURCE_REPOSITORY: ${{ steps.promotion.outputs.source_repository }}
           SOURCE_SHA: ${{ steps.promotion.outputs.source_sha }}
         run: |
-          head_sha="$(gh api "repos/${SOURCE_REPOSITORY}/git/ref/heads/dev" --jq .object.sha)"
+          response="$(curl --silent --show-error --fail --retry 3 \
+            -H "Authorization: Bearer ${SOURCE_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${SOURCE_REPOSITORY}/git/ref/heads/dev")"
+          head_sha="$(jq -er '.object.sha' <<<"${response}")"
           if [[ "${head_sha}" != "${SOURCE_SHA}" ]]; then
             echo "Rejected stale build ${SOURCE_SHA}; dev HEAD is ${head_sha}" >&2
             exit 1

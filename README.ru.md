@@ -287,7 +287,9 @@ deploy: это создаёт drift вне Git.
 4. Добавить полный build/release-контракт в `services.yaml`.
 5. Скопировать `ci-templates/application-caller.yaml` в репозиторий приложения
    как `.github/workflows/kubernetes-release.yaml` и задать service key и
-   настоящий test command.
+   настоящий test command. Команда должна сама подготовить зависимости и
+   запустить обязательный набор тестов; шаблон намеренно завершается ошибкой,
+   пока эта команда не настроена.
 6. Выполнить полный render и validation.
 7. После merge проверить новое `dev-<service>` Application в Argo CD.
 
@@ -337,10 +339,15 @@ git revert <deploy-commit>
 - `ci-templates/application-caller.yaml` показывает минимальный способ вызвать
   reusable workflow из приложения.
 
-Registry jobs используют runner label `13_runner`. На runner не должно быть
+Registry jobs используют runner label `47_runner`. На runner не должно быть
 `kubeconfig`, Vault token
 или SSH-доступа к control-plane. Предпочтителен ephemeral runner; допустима
 выделенная очищаемая VM.
+
+Для всех backend-репозиториев ветка выпуска называется только `dev`. Ветка
+должна существовать и быть защищена до добавления caller workflow. Push из
+`main`, `master`, `develop` или feature-ветки не может собрать Kubernetes
+release, даже если имя ветки по ошибке изменили в `services.yaml`.
 
 ## Что нужно настроить перед эксплуатацией
 

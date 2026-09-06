@@ -41,14 +41,6 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: headlamp
-  labels:
-    app.kubernetes.io/part-of: urban-assistant
-    environment: dev
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: argocd
   labels:
     app.kubernetes.io/part-of: urban-assistant

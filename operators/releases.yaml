@@ -54,12 +54,6 @@ helmReleases:
     chart: gateway-helm
     version: v1.8.3
     values: operators/envoy-gateway-values.yaml
-  - name: headlamp
-    namespace: headlamp
-    repository: https://kubernetes-sigs.github.io/headlamp/
-    chart: headlamp
-    version: 0.44.0
-    values: operators/headlamp-values.yaml
   - name: reloader
     namespace: urban-assistant-dev
     repository: https://stakater.github.io/stakater-charts

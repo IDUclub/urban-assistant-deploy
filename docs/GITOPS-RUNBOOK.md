@@ -162,6 +162,11 @@ The Vault Secrets Operator chart is vendored under
 Helm repository. Verify the recorded upstream digest before upgrading it; Argo
 CD renders the vendored chart directly from this Git repository.
 
+Headlamp is a shared cluster administration tool and remains outside this
+repository. Before removing any previously generated Headlamp Application,
+clear its Argo CD resource finalizer and remove this repository's tracking
+annotation from the `headlamp` Namespace so the shared installation is kept.
+
 For Urban API and PZZ, first inspect the existing migration Jobs and database
 backup state. Do not sync their Applications until a repeated forward migration
 is confirmed safe:

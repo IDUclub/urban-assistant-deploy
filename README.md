@@ -48,6 +48,9 @@ services.yaml                         machine-readable delivery allowlist
 vault-contract.yaml                   complete required Vault keys by path
 ```
 
+Shared cluster administration tools that are not specific to Urban Assistant,
+such as Headlamp, are intentionally outside this repository's ownership.
+
 The complete dev render is deterministic and needs no `.env` file:
 
 ```bash

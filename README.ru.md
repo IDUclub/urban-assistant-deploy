@@ -38,7 +38,7 @@ push в защищённую dev
                                                         v
                                                      Argo CD
                                                         |
-                                      PreSync migration -> rolling update
+                         PreSync migration -> rolling update -> PostSync smoke test
                                                         |
                                                         v
                                                   Kubernetes dev
@@ -171,6 +171,24 @@ Urban API и PZZ выполняют migration Job как Argo CD `PreSync` hook.
 возвращает предыдущий image digest, но никогда автоматически не делает
 downgrade базы данных.
 
+## Проверка выпуска
+
+Kubernetes `startupProbe`, `readinessProbe` и `livenessProbe` постоянно следят
+за состоянием каждого Pod. Дополнительно сервис может содержать Argo CD
+`PostSync` Job, который проверяет его через Kubernetes Service после rollout.
+Argo CD запускает такой Job только после успешной основной синхронизации и
+перехода ресурсов в состояние Healthy. Ошибка smoke test делает всю операцию
+sync неуспешной.
+
+Для Urban API smoke test обращается к `http://urban-api:8000/health_check/db`.
+Он запускается из того же immutable image digest, что и Deployment. Успешный
+Job удаляется, а неуспешный остаётся для диагностики до следующей попытки sync.
+
+Это проверка этапа deploy, поэтому она выполняется внутри Argo CD, а не в
+release workflow приложения. Release workflow заканчивается отправкой promotion
+event, не имеет доступа к кластеру и не знает, когда bot PR будет смержен и
+Argo CD начнёт rollout.
+
 ## Секреты и endpoint-конфигурация
 
 Внутренние Kubernetes Service DNS хранятся в Git: это часть желаемой топологии
@@ -255,11 +273,28 @@ validation, YAML/shell/Actions lint и Gitleaks.
 
 ### Изменить конфигурацию dev
 
-1. Найти overlay в `environments/dev/apps/<service>`.
-2. Изменить ConfigMap, resources или patch.
-3. Не переносить dev-значения в `base`.
-4. Отрендерить сервис и полное окружение.
-5. Создать PR в `main` и дождаться `Validate desired state`.
+Изменение, от которого зависит новый код, готовится до выпуска образа:
+
+1. Сделать изменение приложения обратно совместимым с текущей конфигурацией,
+   например временно поддержать старый и новый key.
+2. Создать PR в deploy-репозиторий. Несекретные настройки изменить в ConfigMap
+   или overlay. Для Vault изменить шаблон `VaultStaticSecret` и полный список
+   keys в `vault-contract.yaml`; реальные значения в Git не добавлять.
+3. До merge deploy PR добавить новые значения в Vault. Сначала добавлять новые
+   keys, а старые пока не удалять.
+4. После merge синхронизировать prerequisites Application и проверить состояния
+   `VaultStaticSecret` (`SYNCED`, `HEALTHY`, `READY`) и созданный Kubernetes
+   Secret. В steady state это выполнит Argo CD автоматически, во время adoption
+   нужен ручной diff/sync.
+5. Только после готовности конфигурации слить изменение приложения в `dev`.
+   Обычный release workflow обновит image digest, а Argo CD выполнит migration,
+   rollout и PostSync smoke test.
+6. Удалить устаревший key или настройку отдельным deploy PR после того, как все
+   использующие их версии приложения выведены из эксплуатации.
+
+Такой порядок нужен потому, что Git приложения, Git deploy-репозитория и Vault
+не образуют одну атомарную транзакцию. Аддитивные, обратно совместимые изменения
+не оставляют момент, в который старый или новый Pod не может запуститься.
 
 После merge Argo CD применит изменение автоматически только в steady-state
 режиме. Во время adoption sync выполняется вручную после проверки diff.

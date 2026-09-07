@@ -22,7 +22,7 @@ push to an application's protected dev branch
   -> verify every digest in the on-prem registry
   -> bot PR updating all release digests atomically
   -> required validation and squash auto-merge
-  -> Argo CD sync, PreSync migration hook, rolling update
+  -> Argo CD sync, PreSync migration, rolling update, PostSync smoke test
 ```
 
 Legacy Compose workflows remain in application repositories during the gradual
@@ -95,6 +95,27 @@ Kubernetes service discovery, the `VaultConnection` bootstrap address, the
 Kubernetes API audience and local `0.0.0.0` bind/listener addresses. Moving the
 Vault bootstrap address into Vault would create a circular dependency.
 
+Configuration changes required by a new application version use an additive,
+two-phase rollout:
+
+1. Keep the application temporarily compatible with both the old and new
+   configuration contract.
+2. Open a deploy-repository PR. Change non-secret settings in the overlay or
+   ConfigMap. For Vault-backed settings, update the `VaultStaticSecret` template
+   and the complete key list in `vault-contract.yaml` without committing values.
+3. Add the new values to Vault before merging the deploy PR. Do not remove old
+   keys yet.
+4. Sync the prerequisites Application and verify the `VaultStaticSecret` and
+   generated Kubernetes Secret.
+5. Release the application to `dev` only after the prepared configuration is
+   ready.
+6. Remove obsolete keys in a later deploy PR after no running version needs
+   them.
+
+Application Git, deploy Git and Vault cannot be updated as one transaction.
+Additive, backward-compatible changes prevent both the old and new pods from
+observing an unusable intermediate state.
+
 ## Argo CD
 
 Argo CD and the shared cluster controllers are prerequisites managed by the
@@ -112,6 +133,18 @@ Urban API and PZZ migrations are `PreSync` hooks with
 blocks the Deployment sync, so old pods stay active. Reverting Git restores an
 old image digest but never attempts a database downgrade; migrations must remain
 backward-compatible and idempotent.
+
+Urban API also has a `PostSync` smoke-test Job. Kubernetes probes continuously
+check individual pods; the hook additionally calls
+`http://urban-api:8000/health_check/db` through the Service after the rollout.
+Argo CD marks the sync failed when this check fails. The Job uses the exact same
+immutable application image digest as the Deployment. Successful Jobs are
+deleted; failed Jobs remain available for diagnostics until the next sync.
+
+This verification belongs to the deployment phase in Argo CD. The application
+release workflow ends after dispatching the promotion event, has no cluster
+credentials and cannot know when the bot PR will merge or the rollout will
+start.
 
 See [docs/GITOPS-RUNBOOK.md](docs/GITOPS-RUNBOOK.md) for attachment and adoption.
 

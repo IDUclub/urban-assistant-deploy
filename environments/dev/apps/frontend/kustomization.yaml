@@ -4,13 +4,15 @@ namespace: urban-assistant-dev
 resources:
   - ../../../../apps/frontend/base
 labels:
-  - pairs: &devLabels
+  - pairs:
       app.kubernetes.io/part-of: urban-assistant
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: legacy-import
+  deployment.urban-assistant/source-revision: 705eec44dacbfbd136a2951ad185a7b0e9c7f7cb
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/Urban-Assistant-Client/actions/runs/34144538437
+  deployment.urban-assistant/config-revision: b541a6820bb05b6d29c27b9b186ea0a5d4d17d01
 images:
   - name: urban-assistant/frontend
     newName: 10.32.11.13:5000/urban-assistant-client
-    digest: sha256:b7cc7dbb6388241c5c15fdb2016b38e02b7f5db17112bd009c719fd7f5bd5101
+    digest: sha256:f8a9d345b834f267658478e96f868cf220b76867b1ae42d8dcc939d26d7bbaa4

@@ -26,6 +26,7 @@ spec:
         - name: migrate
           image: urban-assistant/pzz-compare:base
           imagePullPolicy: IfNotPresent
+          workingDir: /app
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec alembic upgrade head

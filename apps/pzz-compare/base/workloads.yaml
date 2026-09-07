@@ -39,6 +39,9 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec uvicorn service.app:app --host 0.0.0.0 --port 8000
+          env:
+            - name: APP_ENV
+              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -57,6 +60,10 @@ spec:
             - name: runtime
               mountPath: /app/uploads
               subPath: uploads
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
           startupProbe:
             httpGet:
               path: /health
@@ -133,6 +140,9 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=4 -Q default --loglevel=INFO
+          env:
+            - name: APP_ENV
+              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -148,6 +158,10 @@ spec:
             - name: runtime
               mountPath: /app/task_inputs
               subPath: task_inputs
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
           readinessProbe:
             exec:
               command: ["sh", "-ec", "celery -A service.tasks.celery_app inspect ping -d celery@$HOSTNAME | grep -q pong"]
@@ -213,6 +227,9 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=2 -Q llm --loglevel=INFO
+          env:
+            - name: APP_ENV
+              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -228,6 +245,10 @@ spec:
             - name: runtime
               mountPath: /app/task_inputs
               subPath: task_inputs
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
           readinessProbe:
             exec:
               command: ["sh", "-ec", "celery -A service.tasks.celery_app inspect ping -d celery@$HOSTNAME | grep -q pong"]
@@ -293,6 +314,9 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app beat --loglevel=INFO --schedule /tmp/celerybeat-schedule
+          env:
+            - name: APP_ENV
+              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -305,6 +329,10 @@ spec:
             - name: runtime
               mountPath: /app/task_inputs
               subPath: task_inputs
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
           resources:
             requests:
               cpu: 100m

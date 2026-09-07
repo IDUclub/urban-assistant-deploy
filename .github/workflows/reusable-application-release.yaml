@@ -212,7 +212,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: digest-${{ matrix.alias }}
+          # Artifacts are shared by all reusable workflow calls in the same run.
+          name: digest-${{ inputs.service }}-${{ matrix.alias }}
           path: release-digests/${{ matrix.alias }}.json
           if-no-files-found: error
           retention-days: 1
@@ -235,7 +236,7 @@ jobs:
 
       - uses: actions/download-artifact@v5
         with:
-          pattern: digest-*
+          pattern: digest-${{ inputs.service }}-*
           path: release-digests
           merge-multiple: true
 

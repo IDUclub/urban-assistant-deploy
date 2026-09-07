@@ -75,6 +75,21 @@ For frontend, add `MAPBOX_PUBLIC_TOKEN`, `FRONTEND_KEYCLOAK_AUTH_URL` and
 workflow checks out the exact deploy-config revision and generates `service.env`
 immediately before the environment-specific build.
 
+The frontend repository is `IDUclub/Urban-Assistant-Client` and its service key
+is `frontend`. Its caller runs `npm ci` and `npm run typecheck`; the reusable
+workflow sets up Node.js 22 for frontend tests only. Grant the transferred
+repository access to the shared workflow, runner group and deploy-bot secrets,
+and add it to the git-reader App installation before the first release.
+
+Frontend API URLs use same-origin Gateway prefixes. `/genbuilder` and `/idu-dvd`
+are stripped before forwarding to their Services, while `/genplanner` is kept
+because that application includes the prefix in its own routes. Merge the build
+configuration and sync `dev-gateway` before releasing the new frontend.
+
+All `VITE_*` values are public in the generated JavaScript, even when supplied
+through GitHub Secrets. Changes to build configuration or frontend secrets need
+a new frontend commit and image; syncing the previous image does not update them.
+
 ## 4. Populate the Vault contract
 
 Before syncing any `VaultStaticSecret`, populate every key listed in

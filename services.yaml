@@ -5,6 +5,7 @@ namespace: urban-assistant-dev
 registry: 10.32.11.13:5000
 policies:
   githubSecretBuildKeys:
+    - VITE_MAPBOX_TOKEN
     - VITE_KEYCLOAK_AUTH_LOGOUT_REDIRECT
     - VITE_KEYCLOAK_AUTH_URL
   vaultOnlyEnvironmentKeys:
@@ -41,7 +42,7 @@ policies:
     dev/urban-api: [urban-api-config, urban-mcp-config]
 services:
   - name: frontend
-    source: {repository: Five1Three/Urban-Assistant-Client, branch: dev}
+    source: {repository: IDUclub/Urban-Assistant-Client, branch: dev}
     argocdPath: environments/dev/apps/frontend
     healthEndpoint: /
     migration: null

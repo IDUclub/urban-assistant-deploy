@@ -100,6 +100,49 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /genbuilder
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: genbuilder
+          port: 8000
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /genplanner
+      # GenPlanner serves its API under /genplanner; preserve this prefix.
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: genplanner
+          port: 8080
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /idu-dvd
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: idu-dvd
+          port: 8000
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
             value: /
       backendRefs:
         - group: ""
@@ -108,7 +151,7 @@ spec:
           port: 3000
           weight: 1
 ---
-# gMART and PZZ use long-lived SSE responses; Envoy's default is 15 seconds.
+# gMART, PZZ, GenBuilder and GenPlanner use long-lived SSE responses.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:

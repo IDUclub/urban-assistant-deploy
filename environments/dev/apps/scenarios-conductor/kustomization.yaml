@@ -10,8 +10,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: legacy-import
+  deployment.urban-assistant/source-revision: 577051c44f47052dbaae1d54d663b979d78d98df
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/scenarios_conductor/actions/runs/34135000927
 images:
   - name: urban-assistant/scenarios-conductor
     newName: 10.32.11.13:5000/scenarios_conductor
-    digest: sha256:5b7ef1936ad1a0afa84c6392a093ffd237c67d4f5111001614f8e9da19bc6784
+    digest: sha256:f5c7e1c2cf2910401f4030a30d82791bb6081474100371f66f46bbee0f279789

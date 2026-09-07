@@ -4,6 +4,7 @@ namespace: urban-assistant-dev
 resources:
   - ../../../../apps/pzz-compare/prerequisites/base
   - configmap.yaml
+  - env-file-configmap.yaml
   - vault-secret.yaml
 labels:
   - pairs:

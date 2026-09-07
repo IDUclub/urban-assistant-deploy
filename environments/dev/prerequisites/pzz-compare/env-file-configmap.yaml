@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pzz-compare-env-file
+data:
+  # idu-config requires the environment-specific file to exist even though
+  # Kubernetes supplies all runtime values through ConfigMap and Secret env vars.
+  .env.development: ""

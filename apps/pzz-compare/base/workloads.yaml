@@ -39,9 +39,6 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec uvicorn service.app:app --host 0.0.0.0 --port 8000
-          env:
-            - name: APP_ENV
-              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -98,6 +95,12 @@ spec:
         - name: runtime
           persistentVolumeClaim:
             claimName: pzz-runtime-data
+        - name: env-file
+          configMap:
+            name: pzz-compare-env-file
+            items:
+              - key: .env.development
+                path: .env.development
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -140,9 +143,6 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=4 -Q default --loglevel=INFO
-          env:
-            - name: APP_ENV
-              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -185,6 +185,12 @@ spec:
         - name: runtime
           persistentVolumeClaim:
             claimName: pzz-runtime-data
+        - name: env-file
+          configMap:
+            name: pzz-compare-env-file
+            items:
+              - key: .env.development
+                path: .env.development
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -227,9 +233,6 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app worker -P threads --concurrency=2 -Q llm --loglevel=INFO
-          env:
-            - name: APP_ENV
-              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -272,6 +275,12 @@ spec:
         - name: runtime
           persistentVolumeClaim:
             claimName: pzz-runtime-data
+        - name: env-file
+          configMap:
+            name: pzz-compare-env-file
+            items:
+              - key: .env.development
+                path: .env.development
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -314,9 +323,6 @@ spec:
           command: ["sh", "-ec"]
           args:
             - python service/wait_for_db.py && exec celery -A service.tasks.celery_app beat --loglevel=INFO --schedule /tmp/celerybeat-schedule
-          env:
-            - name: APP_ENV
-              value: development
           envFrom:
             - configMapRef:
                 name: pzz-compare-config
@@ -350,6 +356,12 @@ spec:
         - name: runtime
           persistentVolumeClaim:
             claimName: pzz-runtime-data
+        - name: env-file
+          configMap:
+            name: pzz-compare-env-file
+            items:
+              - key: .env.development
+                path: .env.development
 ---
 apiVersion: apps/v1
 kind: Deployment

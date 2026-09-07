@@ -34,6 +34,11 @@ spec:
                 name: pzz-compare-config
             - secretRef:
                 name: pzz-compare-secrets
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -47,3 +52,10 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: pzz-compare-env-file
+            items:
+              - key: .env.development
+                path: .env.development

@@ -9,9 +9,6 @@ rules:
 ignore: |
   .yamllint
   local/
-  operators/vault-secrets-operator/Chart.yaml
-  operators/vault-secrets-operator/crds/
-  operators/vault-secrets-operator/templates/
-  operators/vault-secrets-operator/values.yaml
+  .venv/
   rendered/
   rendered-ci/

@@ -22,6 +22,12 @@ service.env
 !.env.example
 __pycache__/
 *.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 /.idea/
 /.vscode/
 .DS_Store

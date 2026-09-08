@@ -33,7 +33,7 @@ jobs:
       - name: Render and validate repository invariants
         run: python scripts/validate.py --root . --output-dir rendered-ci
 
-      - name: Test promotion contract
+      - name: Test repository contracts
         run: python -m unittest discover -s tests -v
 
       - name: Check generated smoke jobs

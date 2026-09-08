@@ -129,6 +129,10 @@ def update_overlay(root: Path, service: dict[str, Any], images: list[dict[str, s
         raise PromotionError("commonAnnotations in the target overlay must be a mapping")
     annotations["deployment.urban-assistant/source-revision"] = payload["source_sha"]
     annotations["deployment.urban-assistant/source-workflow"] = payload["workflow_run_url"]
+    # Frontend config provenance belongs to the selected image, not the previous
+    # release. In particular, rollback to an older image may have no such field.
+    if service["name"] == "frontend":
+        annotations.pop("deployment.urban-assistant/config-revision", None)
     if payload.get("config_revision"):
         annotations["deployment.urban-assistant/config-revision"] = payload["config_revision"]
 

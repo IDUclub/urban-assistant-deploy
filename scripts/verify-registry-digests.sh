@@ -8,10 +8,6 @@ curl_args=(--silent --show-error --fail --head --connect-timeout 10)
 if [[ "${REGISTRY_INSECURE_TLS:-true}" == true ]]; then
   curl_args+=(--insecure)
 fi
-if [[ -n "${REGISTRY_USERNAME:-}" ]]; then
-  : "${REGISTRY_PASSWORD:?REGISTRY_PASSWORD is required with REGISTRY_USERNAME}"
-  curl_args+=(--user "${REGISTRY_USERNAME}:${REGISTRY_PASSWORD}")
-fi
 
 while IFS=$'\t' read -r repository digest; do
   registry="${repository%%/*}"

@@ -2,6 +2,10 @@
 
 Русский | [English](README.md)
 
+[Ручной rollback, smoke-тесты и GitHub status](docs/ROLLBACK-AND-STATUS.ru.md)
+
+[Статусы Argo в репозиториях приложений](docs/FORWARD-DEPLOYMENT-STATUS.ru.md)
+
 Приватный GitOps-репозиторий конфигурации платформы «Помощник
 проектировщика». Он описывает желаемое состояние Kubernetes-кластеров, но не
 содержит исходный код приложений. Git является единственным источником истины:

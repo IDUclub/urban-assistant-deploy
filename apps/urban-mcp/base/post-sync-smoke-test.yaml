@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: urban-api-smoke-test
+  name: urban-mcp-smoke-test
   labels:
-    app.kubernetes.io/name: urban-api-smoke-test
+    app.kubernetes.io/name: urban-mcp-smoke-test
     app.kubernetes.io/component: smoke-test
   annotations:
     argocd.argoproj.io/hook: PostSync
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: urban-api-smoke-test
+        app.kubernetes.io/name: urban-mcp-smoke-test
         app.kubernetes.io/component: smoke-test
     spec:
       restartPolicy: Never
@@ -23,7 +23,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: smoke-test
-          image: urban-assistant/urban-api:base
+          image: urban-assistant/urban-mcp:base
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -150,7 +150,7 @@ spec:
                   main()
           env:
             - name: SMOKE_CHECKS
-              value: '[{"url":"http://urban-api:8000/health_check/db"}]'
+              value: '[{"type":"mcp","url":"http://urban-mcp:8001/mcp/projects/"},{"type":"mcp","url":"http://urban-mcp:8001/mcp/territories/"},{"type":"mcp","url":"http://urban-mcp:8001/mcp/physical_objects/"},{"type":"mcp","url":"http://urban-mcp:8001/mcp/dictionaries/"},{"type":"mcp","url":"http://urban-mcp:8001/mcp/indicators/"},{"type":"mcp","url":"http://urban-mcp:8001/mcp/soc_groups/"}]'
           resources:
             requests:
               cpu: 10m

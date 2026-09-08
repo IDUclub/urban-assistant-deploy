@@ -1,5 +1,8 @@
 # Urban Assistant Deploy
 
+Operations update: [manual rollback, smoke tests and GitHub status (RU)](docs/ROLLBACK-AND-STATUS.ru.md).
+Setup: [forward Argo statuses to application commits (RU)](docs/FORWARD-DEPLOYMENT-STATUS.ru.md).
+
 [Русская версия](README.ru.md) | English
 
 Private GitOps repository for the Urban Assistant platform. Git is the source

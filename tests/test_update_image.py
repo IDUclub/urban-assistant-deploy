@@ -77,6 +77,19 @@ class UpdateImageTests(unittest.TestCase):
         with self.assertRaisesRegex(UPDATE_IMAGE.PromotionError, "exactly these aliases"):
             UPDATE_IMAGE.validate_payload(self.payload, self.catalog)
 
+    def test_frontend_does_not_keep_stale_config_provenance(self) -> None:
+        service = self.catalog["services"][0]
+        service["name"] = "frontend"
+        path = self.root / service["argocdPath"] / "kustomization.yaml"
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+        document["commonAnnotations"] = {"deployment.urban-assistant/config-revision": "previous-build-config"}
+        path.write_text(yaml.safe_dump(document), encoding="utf-8")
+        self.payload["service"] = "frontend"
+        _, images = UPDATE_IMAGE.validate_payload(self.payload, self.catalog)
+        UPDATE_IMAGE.update_overlay(self.root, service, images, self.payload)
+        updated = yaml.safe_load(path.read_text(encoding="utf-8"))
+        self.assertNotIn("deployment.urban-assistant/config-revision", updated["commonAnnotations"])
+
     def test_rejects_repository_substitution(self) -> None:
         self.payload["images"][0]["repository"] = "attacker.invalid/api"
         with self.assertRaisesRegex(UPDATE_IMAGE.PromotionError, "not allowlisted"):

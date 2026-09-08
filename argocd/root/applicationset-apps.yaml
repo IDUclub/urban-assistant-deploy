@@ -18,6 +18,9 @@ spec:
       labels:
         environment: dev
         app.kubernetes.io/part-of: urban-assistant
+      annotations:
+        notifications.argoproj.io/subscribe.ua-github-status.github: ""
+        deployment.urban-assistant/smoke-job: '{{ .path.basename }}-smoke-test'
     spec:
       project: urban-assistant-apps
       source:
@@ -34,6 +37,5 @@ spec:
           selfHeal: true
           allowEmpty: false
         syncOptions:
-          - ApplyOutOfSyncOnly=true
           - ServerSideApply=true
       revisionHistoryLimit: 10

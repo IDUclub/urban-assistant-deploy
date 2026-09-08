@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: urban-api-smoke-test
+  name: normgraph-smoke-test
   labels:
-    app.kubernetes.io/name: urban-api-smoke-test
+    app.kubernetes.io/name: normgraph-smoke-test
     app.kubernetes.io/component: smoke-test
   annotations:
     argocd.argoproj.io/hook: PostSync
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: urban-api-smoke-test
+        app.kubernetes.io/name: normgraph-smoke-test
         app.kubernetes.io/component: smoke-test
     spec:
       restartPolicy: Never
@@ -23,7 +23,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: smoke-test
-          image: urban-assistant/urban-api:base
+          image: urban-assistant/normgraph:base
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -150,7 +150,7 @@ spec:
                   main()
           env:
             - name: SMOKE_CHECKS
-              value: '[{"url":"http://urban-api:8000/health_check/db"}]'
+              value: '[{"url":"http://normgraph:8020/ping"}]'
           resources:
             requests:
               cpu: 10m

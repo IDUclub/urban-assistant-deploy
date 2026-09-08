@@ -42,6 +42,8 @@ policies:
     dev/urban-api: [urban-api-config, urban-mcp-config]
 services:
   - name: frontend
+    smokeChecks:
+      - {url: 'http://urban-assistant-frontend:3000/', contains: '<html'}
     source: {repository: IDUclub/Urban-Assistant-Client, branch: dev}
     argocdPath: environments/dev/apps/frontend
     healthEndpoint: /
@@ -52,6 +54,8 @@ services:
       - {alias: frontend, kustomizeName: urban-assistant/frontend, repository: 10.32.11.13:5000/urban-assistant-client, context: ., dockerfile: Dockerfile, target: null}
 
   - name: urban-api
+    smokeChecks:
+      - {url: 'http://urban-api:8000/health_check/db'}
     source: {repository: IDUclub/idu_api, branch: dev}
     argocdPath: environments/dev/apps/urban-api
     healthEndpoint: /health_check/db
@@ -63,6 +67,13 @@ services:
       - {alias: migrator, kustomizeName: urban-assistant/urban-migrator, repository: 10.32.11.13:5000/urban_migrator, context: ., dockerfile: migrations.Dockerfile, target: null}
 
   - name: urban-mcp
+    smokeChecks:
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/projects/'}
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/territories/'}
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/physical_objects/'}
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/dictionaries/'}
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/indicators/'}
+      - {type: mcp, url: 'http://urban-mcp:8001/mcp/soc_groups/'}
     source: {repository: IDUclub/idu_api, branch: dev}
     argocdPath: environments/dev/apps/urban-mcp
     healthEndpoint: null
@@ -73,6 +84,8 @@ services:
       - {alias: mcp, kustomizeName: urban-assistant/urban-mcp, repository: 10.32.11.13:5000/urban_mcp, context: ., dockerfile: urban_mcp/Dockerfile, target: null}
 
   - name: idu-dvd
+    smokeChecks:
+      - {url: 'http://idu-dvd:8000/ping'}
     source: {repository: IDUclub/IDU_DVD, branch: dev}
     argocdPath: environments/dev/apps/idu-dvd
     healthEndpoint: /ping
@@ -83,6 +96,8 @@ services:
       - {alias: api, kustomizeName: urban-assistant/idu-dvd, repository: 10.32.11.13:5000/idu_dvd, context: ., dockerfile: Dockerfile, target: null}
 
   - name: normgraph
+    smokeChecks:
+      - {url: 'http://normgraph:8020/ping'}
     source: {repository: IDUclub/NormGraph, branch: dev}
     argocdPath: environments/dev/apps/normgraph
     healthEndpoint: /ping
@@ -93,6 +108,9 @@ services:
       - {alias: api, kustomizeName: urban-assistant/normgraph, repository: 10.32.11.13:5000/normgraph, context: ., dockerfile: Dockerfile, target: null}
 
   - name: gmart
+    smokeChecks:
+      - {url: 'http://gmart:8080/ping'}
+      - {url: 'http://gmart-mcp:8000/health'}
     source: {repository: IDUclub/gMART, branch: dev}
     argocdPath: environments/dev/apps/gmart
     healthEndpoint: /ping
@@ -104,6 +122,8 @@ services:
       - {alias: mcp, kustomizeName: urban-assistant/gmart-mcp, repository: 10.32.11.13:5000/idu_mcp, context: ., dockerfile: docker/Dockerfile-mcp, target: null}
 
   - name: chat-storage
+    smokeChecks:
+      - {url: 'http://chat-storage:8000/ping'}
     source: {repository: IDUclub/ChatStorage, branch: dev}
     argocdPath: environments/dev/apps/chat-storage
     healthEndpoint: /ping
@@ -114,6 +134,8 @@ services:
       - {alias: api, kustomizeName: urban-assistant/chat-storage, repository: 10.32.11.13:5000/chat_storage, context: ., dockerfile: Dockerfile, target: null}
 
   - name: object-effects
+    smokeChecks:
+      - {url: 'http://object-effects:8080/status'}
     source: {repository: IDUclub/ObjectEffectsAPI, branch: dev}
     argocdPath: environments/dev/apps/object-effects
     healthEndpoint: /status
@@ -124,6 +146,8 @@ services:
       - {alias: api, kustomizeName: urban-assistant/object-effects, repository: 10.32.11.13:5000/object_effects, context: ., dockerfile: Dockerfile, target: null}
 
   - name: genbuilder
+    smokeChecks:
+      - {url: 'http://genbuilder:8000/docs', contains: 'swagger-ui'}
     source: {repository: IDUclub/genbuilder_api, branch: dev}
     argocdPath: environments/dev/apps/genbuilder
     healthEndpoint: /docs
@@ -134,6 +158,9 @@ services:
       - {alias: api, kustomizeName: urban-assistant/genbuilder, repository: 10.32.11.13:5000/genbuilder, context: ., dockerfile: Dockerfile, target: null}
 
   - name: genplanner
+    smokeChecks:
+      - {url: 'http://genplanner:8080/docs', contains: 'swagger-ui'}
+      - {url: 'http://genplanner-mcp:8766/health'}
     source: {repository: IDUclub/GenPlanner, branch: dev}
     argocdPath: environments/dev/apps/genplanner
     healthEndpoint: /docs
@@ -144,6 +171,11 @@ services:
       - {alias: api, kustomizeName: urban-assistant/genplanner, repository: 10.32.11.13:5000/genplanner_api, context: ., dockerfile: Dockerfile, target: null}
 
   - name: pzz-compare
+    smokeChecks:
+      - {url: 'http://pzz-compare:8000/readiness', jsonEquals: {status: ready}}
+      - {url: 'http://pzz-mcp:8765/health'}
+      - {url: 'http://pzz-worker:9100/metrics', contains: '# HELP'}
+      - {url: 'http://pzz-worker-llm:9100/metrics', contains: '# HELP'}
     source: {repository: IDUclub/PzzCompareAPI, branch: dev}
     argocdPath: environments/dev/apps/pzz-compare
     healthEndpoint: /readiness
@@ -154,6 +186,8 @@ services:
       - {alias: api, kustomizeName: urban-assistant/pzz-compare, repository: 10.32.11.13:5000/pzz-pipeline, context: ., dockerfile: Dockerfile, target: null}
 
   - name: scenarios-conductor
+    smokeChecks:
+      - {url: 'http://scenarios-conductor-metrics:9000/metrics', contains: '# HELP'}
     source: {repository: IDUclub/scenarios_conductor, branch: dev}
     argocdPath: environments/dev/apps/scenarios-conductor
     healthEndpoint: /metrics

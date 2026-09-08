@@ -1,0 +1,118 @@
+"""Read-only HTTP/MCP checks embedded in PostSync jobs. Python standard library only."""
+
+import json
+import os
+import time
+import urllib.error
+import urllib.request
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+LIMIT = 1024 * 1024
+
+
+def rpc_reply(response):
+    if "text/event-stream" not in response.headers.get("Content-Type", ""):
+        return json.loads(response.read(LIMIT))
+    # SSE connections can stay open: stop at the first complete JSON-RPC reply,
+    # not at EOF. Bound size/time even when the peer keeps sending events.
+    data, size, deadline = [], 0, time.monotonic() + 10
+    while size < LIMIT and time.monotonic() < deadline:
+        line = response.readline(LIMIT - size)
+        if not line:
+            break
+        size += len(line)
+        line = line.decode("utf-8").rstrip("\r\n")
+        if line.startswith("data:"):
+            data.append(line[5:].lstrip())
+        elif not line and data:
+            message = json.loads("\n".join(data))
+            if isinstance(message, dict) and message.get("id") == 1:
+                return message
+            data = []
+    raise ValueError("no complete MCP initialize response")
+
+
+def check(probe):
+    url = probe["url"]
+    is_mcp = probe.get("type") == "mcp"
+    headers = {"Accept": "application/json, text/event-stream" if is_mcp else "*/*"}
+    data = None
+    if is_mcp:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps({
+            "jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {"protocolVersion": "2025-03-26", "capabilities": {},
+                       "clientInfo": {"name": "urban-assistant-smoke", "version": "1.0"}},
+        }).encode()
+    request = urllib.request.Request(url, data=data, headers=headers)
+    session = None
+    try:
+        with OPENER.open(request, timeout=5) as response:
+            if response.status != 200:
+                raise ValueError(f"unexpected HTTP {response.status}")
+            if is_mcp:
+                session = response.headers.get("Mcp-Session-Id")
+                message = rpc_reply(response)
+                result = message.get("result", {}) if isinstance(message, dict) else {}
+                if (not isinstance(message, dict) or message.get("jsonrpc") != "2.0" or message.get("id") != 1 or "error" in message
+                        or not isinstance(result, dict) or not result.get("protocolVersion")
+                        or not isinstance(result.get("capabilities"), dict)):
+                    raise ValueError("invalid MCP initialize result")
+            else:
+                body = response.read(LIMIT).decode("utf-8")
+                if not body.strip():
+                    raise ValueError("empty HTTP response")
+                if "contains" in probe and probe["contains"].lower() not in body.lower():
+                    raise ValueError("response does not contain expected marker")
+                if "jsonEquals" in probe:
+                    document = json.loads(body)
+                    if not isinstance(document, dict) or any(
+                        document.get(key) != value for key, value in probe["jsonEquals"].items()
+                    ):
+                        raise ValueError("unexpected JSON health response")
+    finally:
+        if session:
+            # Close only the short-lived session created by this probe. Servers
+            # may not implement DELETE; that does not invalidate initialization.
+            try:
+                request = urllib.request.Request(url, method="DELETE", headers={
+                    "Mcp-Session-Id": session, "MCP-Protocol-Version": "2025-03-26",
+                })
+                with OPENER.open(request, timeout=3):
+                    pass
+            except (OSError, urllib.error.URLError):
+                pass
+
+
+def main():
+    probes = json.loads(os.environ["SMOKE_CHECKS"])
+    if not isinstance(probes, list) or not probes:
+        raise SystemExit("SMOKE_CHECKS must be a non-empty list")
+    pending = list(probes)
+    for attempt in range(1, 13):
+        failed = []
+        for probe in pending:
+            try:
+                check(probe)
+                print(f"PASS {probe['url']}", flush=True)
+            except (OSError, ValueError, urllib.error.URLError) as error:
+                # Do not print response bodies, credentials or application logs.
+                print(f"FAIL attempt={attempt} {probe['url']} ({type(error).__name__})", flush=True)
+                failed.append(probe)
+        if not failed:
+            print("All smoke checks passed", flush=True)
+            return
+        pending = failed
+        if attempt < 12:
+            time.sleep(5)
+    raise SystemExit("Smoke checks failed")
+
+
+if __name__ == "__main__":
+    main()

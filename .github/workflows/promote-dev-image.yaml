@@ -67,8 +67,6 @@ jobs:
           PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
           REGISTRY_SCHEME: https
           REGISTRY_INSECURE_TLS: "true"
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_READ_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_READ_PASSWORD }}
         run: bash scripts/verify-registry-digests.sh
 
       - name: Create deploy-repository write token

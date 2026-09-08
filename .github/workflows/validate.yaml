@@ -36,6 +36,9 @@ jobs:
       - name: Test promotion contract
         run: python -m unittest discover -s tests -v
 
+      - name: Check generated smoke jobs
+        run: python scripts/generate-smoke-tests.py --check
+
       - name: Validate Kubernetes and CRD schemas
         uses: docker://ghcr.io/yannh/kubeconform:v0.8.0
         with:

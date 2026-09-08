@@ -10,9 +10,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 577051c44f47052dbaae1d54d663b979d78d98df
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/scenarios_conductor/actions/runs/34135000927
+  deployment.urban-assistant/source-revision: 872a973b23663db999b13a64c11ea56d327e1133
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/scenarios_conductor/actions/runs/34160075623
 images:
   - name: urban-assistant/scenarios-conductor
     newName: 10.32.11.13:5000/scenarios_conductor
-    digest: sha256:f5c7e1c2cf2910401f4030a30d82791bb6081474100371f66f46bbee0f279789
+    digest: sha256:7eec76f4e7eaf03572a85d76a47d394049cc83edd580c85b06b31ba24c590990

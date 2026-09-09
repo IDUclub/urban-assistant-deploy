@@ -6,7 +6,7 @@ data:
   NG_NEO4J_DATABASE: neo4j
   NG_DVD_BASE_URL: http://idu-dvd:8000
   NG_LLM_PROVIDER: openai_compatible
-  NG_LLM_MODEL: gpt-oss:20b
+  NG_LLM_MODEL: gpt-oss-20b
   NG_EMBEDDINGS_PROVIDER: openai_compatible
   NG_EMBEDDINGS_MODEL: ai-sage/Giga-Embeddings-instruct
   NG_KAFKA_BOOTSTRAP_SERVERS: urban-assistant-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
@@ -21,3 +21,4 @@ data:
   NG_LOG_LEVEL: INFO
   NG_LOG_DIR: /tmp/normgraph/logs
   NG_LOG_FILE: app.log
+  NG_EXTRACT_CONCURRENCY: "64"

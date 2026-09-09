@@ -21,4 +21,4 @@ data:
   NG_LOG_LEVEL: INFO
   NG_LOG_DIR: /tmp/normgraph/logs
   NG_LOG_FILE: app.log
-  NG_EXTRACT_CONCURRENCY: 64
+  NG_EXTRACT_CONCURRENCY: "64"

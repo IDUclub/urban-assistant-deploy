@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 8c9ed4f1d634e35dcc2284ea6cfe9e04220ae507
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/IDU_DVD/actions/runs/34219237141
+  deployment.urban-assistant/source-revision: f5b149e81fa9b9cf201d421e0850550a62e153c6
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/IDU_DVD/actions/runs/34410678858
 images:
   - name: urban-assistant/idu-dvd
     newName: 10.32.11.13:5000/idu_dvd
-    digest: sha256:e449d2ce7113f574a54650d46ad94fa5c4b7fb01e558b9a42e869885ebee1893
+    digest: sha256:3a290381255f1e5b44cdd671a69d76f00f0cd149378fe4ea7ed1e4ea1dee55ac

@@ -17,7 +17,7 @@ data:
   NORM_GRAPH_MCP_SERVER: http://normgraph:8020/mcp
   URBAN_MCP_SERVER: http://urban-mcp:8001
   CHAT_STORAGE: http://chat-storage:8000
-  URBAN_API_URL: http://urban-api:8000
+  URBAN_API_URL: http://urban-api:8000/api
   SERVICE_AUTH_REALM: IDU
   SERVICE_AUTH_CLIENT_ID: gmart
   IDU_MCP_WORKSPACE_ENABLED: "false"

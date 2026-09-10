@@ -33,6 +33,9 @@ paths:
     - redis_password
     - service_auth_client_secret
     - service_auth_server_url
+    - synapse_api_url
+    - synapse_service_email
+    - synapse_service_password
     - system_password
   dev/idu-dvd:
     - auth_helper_api_key

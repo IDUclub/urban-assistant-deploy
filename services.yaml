@@ -41,6 +41,7 @@ policies:
     - SYNAPSE_SERVICE_PASSWORD
     - VECTORIZER_URL
     - VLLM_BASE_URL
+    - DVD_LLM_BASE_URL
   allowedSharedVaultPaths:
     dev/urban-api: [urban-api-config, urban-mcp-config]
 services:

@@ -49,6 +49,7 @@ paths:
     - fs_secret_key
     - redis_password
     - service_auth_client_secret
+    - dvd_llm_base_url
   dev/normgraph:
     - neo4j_password
     - neo4j_user

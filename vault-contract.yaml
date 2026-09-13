@@ -41,6 +41,7 @@ paths:
     - auth_helper_api_key
     - dvd_auth_helper_url
     - dvd_embeddings_url
+    - dvd_llm_base_url
     - dvd_minio_endpoint
     - dvd_ollama_base
     - dvd_qdrant_url
@@ -49,7 +50,6 @@ paths:
     - fs_secret_key
     - redis_password
     - service_auth_client_secret
-    - dvd_llm_base_url
   dev/normgraph:
     - neo4j_password
     - neo4j_user

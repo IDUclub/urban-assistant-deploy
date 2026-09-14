@@ -11,6 +11,7 @@ data:
   DVD_QDRANT_COLLECTION: documents
   DVD_COLLECTION_NAMESPACING: "true"
   DVD_URBAN_API_URL: http://urban-api:8000
+  DVD_LOGICAL_PARTITION_MODE: ranges
   DVD_MINIO_SECURE: "false"
   DVD_MINIO_BUCKET_DOCUMENTS: dvd-documents.dev
   DVD_MINIO_BUCKET_USER_DOCUMENTS: dvd-user-documents.dev

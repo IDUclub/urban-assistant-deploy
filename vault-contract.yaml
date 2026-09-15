@@ -54,6 +54,7 @@ paths:
     - neo4j_password
     - neo4j_user
     - ng_embeddings_url
+    - ng_llm_base_url
     - ng_neo4j_uri
     - ng_ollama_base
     - ng_service_auth_server_url

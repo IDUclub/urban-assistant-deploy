@@ -10,9 +10,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 7fe385fcb1ec6b96366abd0ac95d36ba1fa258e8
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/idu_api/actions/runs/34150930439
+  deployment.urban-assistant/source-revision: f6395825a5467a09907ee7671f9c0155046f754e
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/idu_api/actions/runs/34962994000
 images:
   - name: urban-assistant/urban-mcp
     newName: 10.32.11.13:5000/urban_mcp
-    digest: sha256:49562115734d5573ab6950e3fc67bbb7165a3e64b3bba69569a6976fae6090e5
+    digest: sha256:4d410377c957fd5dc614415f6804663ac7270adcba823c9ee84ec20d322438ba

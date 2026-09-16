@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: e8d794b71015917c620b7d0c39d79862cfb02a7b
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/NormGraph/actions/runs/34981170467
+  deployment.urban-assistant/source-revision: 820e7e4385b7c9cab041686f35bca4c3bac79060
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/NormGraph/actions/runs/35065919886
 images:
   - name: urban-assistant/normgraph
     newName: 10.32.11.13:5000/normgraph
-    digest: sha256:6e6f5f85235abd8963aad118f11cbbe7ca6b6ba4ddc2ff64f4ce35a55e4f6a3b
+    digest: sha256:c1f332e328e927a255648f3242ff62a33a1a73b16ee9942c507123276a31f220

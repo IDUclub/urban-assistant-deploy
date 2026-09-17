@@ -10,9 +10,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 2691608728b209af12dcf316274d48eb9784d77d
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/SirtepAPI/actions/runs/35206462603
+  deployment.urban-assistant/source-revision: e0d9628670212f22c5bfff505e481fe9abcb65c9
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/SirtepAPI/actions/runs/35221752432
 images:
   - name: urban-assistant/sirtep
     newName: 10.32.11.13:5000/sirtep
-    digest: sha256:d20c0ef81276958c4e1f241380109d5a7ea875dfca6c8d5abb7caf95fce39a25
+    digest: sha256:bf129df8eebdc77a1c187131ccd6076359ad19706f8f2605c2b985fe367e3151

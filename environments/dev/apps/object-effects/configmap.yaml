@@ -10,3 +10,4 @@ data:
     PROMETHEUS_PORT=9464
     SERVICE_AUTH_REALM=IDU
     SERVICE_AUTH_CLIENT_ID=object-effects
+    APP_ENV=development

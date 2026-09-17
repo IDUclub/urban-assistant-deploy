@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sirtep
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/monitor: sirtep
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

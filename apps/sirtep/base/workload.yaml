@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sirtep
+  annotations:
+    configmap.reloader.stakater.com/reload: sirtep-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sirtep
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sirtep
+        app.kubernetes.io/component: api
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: app
+          image: urban-assistant/sirtep:base
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - exec gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 1000 --worker-class uvicorn.workers.UvicornWorker app.main:app
+          env:
+            - name: APP_ENV
+              value: development
+            - name: APP_WORKERS
+              value: "1"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 9464
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/sirtep
+          startupProbe:
+            httpGet:
+              path: /optimize/available_profiles
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /optimize/available_profiles
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "4"
+              memory: 6Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: sirtep-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sirtep
+  labels:
+    app.kubernetes.io/monitor: sirtep
+spec:
+  selector:
+    app.kubernetes.io/name: sirtep
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sirtep-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: sirtep
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 31010

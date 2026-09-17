@@ -20,6 +20,7 @@ on:
           - object-effects
           - pzz-compare
           - scenarios-conductor
+          - sirtep
       revision:
         description: Full DEPLOY repository commit SHA containing the working images
         type: string

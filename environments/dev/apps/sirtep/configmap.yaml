@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sirtep-env-file
+data:
+  .env.development: |
+    ACTUALITY=168
+    CACHE_ACTUALITY=168
+    COMMON_CACHE=/tmp/sirtep/cache
+    DEFAULT_FLOORS=3
+    LIVING_AREA_COEF=0.8
+    LOG_NAME=/tmp/sirtep/sirtep.log
+    MATRIX_CACHE=matrix_cache
+    MEDIUM_SPEED=40
+    METRES_PER_HUMAN=20
+    NON_POLY_OBJECTS_BUFFER=5
+    PROMETHEUS_PORT=9464
+    PROVISION_CACHE=provision_cache
+    RESPONSE_CACHE=response_cache
+    URBAN_API=http://urban-api:8000

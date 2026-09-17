@@ -150,6 +150,18 @@ services:
     images:
       - {alias: api, kustomizeName: urban-assistant/object-effects, repository: 10.32.11.13:5000/object_effects, context: ., dockerfile: Dockerfile, target: null}
 
+  - name: sirtep
+    smokeChecks:
+      - {url: 'http://sirtep:8080/optimize/available_profiles'}
+    source: {repository: IDUclub/SirtepAPI, branch: dev}
+    argocdPath: environments/dev/apps/sirtep
+    healthEndpoint: /optimize/available_profiles
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/sirtep, repository: 10.32.11.13:5000/sirtep, context: ., dockerfile: Dockerfile, target: null}
+
   - name: genbuilder
     smokeChecks:
       - {url: 'http://genbuilder:8000/docs', contains: 'swagger-ui'}

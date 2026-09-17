@@ -108,6 +108,7 @@ Bases используют логические имена образов; overl
 | `idu-dvd` | [IDUclub/IDU_DVD](https://github.com/IDUclub/IDU_DVD) | `api` | `/ping` |
 | `normgraph` | [IDUclub/NormGraph](https://github.com/IDUclub/NormGraph) | `api` | `/ping` |
 | `object-effects` | [IDUclub/ObjectEffectsAPI](https://github.com/IDUclub/ObjectEffectsAPI) | `api` | `/status` |
+| `sirtep` | [IDUclub/SirtepAPI](https://github.com/IDUclub/SirtepAPI) | `api` | `/optimize/available_profiles` |
 | `pzz-compare` | [IDUclub/PzzCompareAPI](https://github.com/IDUclub/PzzCompareAPI) | `api` для API, MCP, workers и migrator | `/readiness` (БД + Redis), MCP health, метрики обоих workers |
 | `scenarios-conductor` | [IDUclub/scenarios_conductor](https://github.com/IDUclub/scenarios_conductor) | `api` — образ worker | `/metrics` с Prometheus-маркерами |
 

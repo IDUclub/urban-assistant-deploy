@@ -5,7 +5,7 @@ metadata:
 data:
   .env.development: |
     LOGS_FILE=/tmp/object-effects/object-effects
-    URBAN_API=http://urban-api:8000
+    URBAN_API=http://urban-api:8000/api
     MCP_URBAN_API=http://urban-api:8000
     PROMETHEUS_PORT=9464
     SERVICE_AUTH_REALM=IDU

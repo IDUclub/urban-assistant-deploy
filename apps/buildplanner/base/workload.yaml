@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildplanner
+  annotations:
+    configmap.reloader.stakater.com/reload: buildplanner-env-file
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: buildplanner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: buildplanner
+        app.kubernetes.io/component: api
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      containers:
+        - name: app
+          image: urban-assistant/buildplanner:base
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_ENV
+              value: development
+          envFrom:
+            - secretRef:
+                name: buildplanner-secrets
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env.development
+              subPath: .env.development
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp/buildplanner
+          startupProbe:
+            httpGet:
+              path: /buildplanner/health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /buildplanner/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /buildplanner/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: env-file
+          configMap:
+            name: buildplanner-env-file
+        - name: runtime
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildplanner
+spec:
+  selector:
+    app.kubernetes.io/name: buildplanner
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildplanner-dev
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app.kubernetes.io/name: buildplanner
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 31011

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: buildplanner-env-file
+data:
+  .env.development: |
+    APP_ENV=development
+    LOG_LEVEL=INFO
+    LOG_FILE=/tmp/buildplanner/buildplanner.log
+    OUTPUTS_DIR=/tmp/buildplanner/outputs
+    URBAN_API=http://urban-api:8000
+    GENPLANNER_API=http://genplanner:8080
+    GENBUILDER_API=http://genbuilder:8000
+    SIRTEP_API=http://sirtep:8080
+    CHAT_STORAGE_API=http://chat-storage:8000
+    LLM_MODEL=gpt-oss-20b
+    KEYCLOAK_REALM=IDU
+    KEYCLOAK_CLIENT_ID=buildplanner
+    PUBLISH_TO_URBAN=true
+    SERVICE_PROJECT_PREFIX=BuildPlanner
+    PUBLISH_ZONE_SOURCE=BuildPlanner
+    MINIO_BUCKET_NAME=buildplanner.dev
+    MINIO_REGION=us-east-1
+    SIRTEP_PERIODS=20
+    SIRTEP_MAX_AREA_PER_PERIOD=100000
+    SCORE_WAIT_ENABLED=true
+    SCORE_INDICATOR_IDS=193,194,195,197,198,199,200,201,202,203,204

@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: urban-assistant-dev
+resources:
+  - ../../../../apps/buildplanner/base
+  - configmap.yaml
+  - vault-secret.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: urban-assistant
+      environment: dev
+    includeSelectors: false
+commonAnnotations:
+  deployment.urban-assistant/source-revision: legacy-import
+images:
+  - name: urban-assistant/buildplanner
+    newName: 10.32.11.13:5000/buildplanner
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000

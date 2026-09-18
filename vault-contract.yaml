@@ -2,6 +2,14 @@ apiVersion: deployment.urban-assistant/v1alpha1
 kind: VaultContract
 mount: urban-assistant-kv
 paths:
+  dev/buildplanner:
+    - keycloak_client_secret
+    - keycloak_url
+    - llm_api
+    - minio_access_key
+    - minio_address
+    - minio_secret_key
+    - public_base_url
   dev/chat-storage:
     - auth_server_url
     - mongo_password

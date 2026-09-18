@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: b7bb49f7b74429c943ca35c7b27fbda1f965e7ce
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/BuildPlanner/actions/runs/35336084811
+  deployment.urban-assistant/source-revision: 0e02f2e3c944f272246f279d7aa774a40423d9b3
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/BuildPlanner/actions/runs/35355684782
 images:
   - name: urban-assistant/buildplanner
     newName: 10.32.11.13:5000/buildplanner
-    digest: sha256:8e461f790f8c300106e1a2225cd943f7e0fea840fc38a9c05ee9c827dc95cedc
+    digest: sha256:8309b04a390720a49e37fe34ad975591350cf6a60d37cc4198e199dae6b6f6e9

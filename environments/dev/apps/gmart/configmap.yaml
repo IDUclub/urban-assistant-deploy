@@ -16,6 +16,10 @@ data:
   DVD_API_URL: http://idu-dvd:8000
   NORM_GRAPH_MCP_SERVER: http://normgraph:8020/mcp
   URBAN_MCP_SERVER: http://urban-mcp:8001
+  GENPLANNER_MCP_SERVER: http://genplanner-mcp:8766/mcp
+  GENBUILDER_MCP_SERVER: http://genbuilder:8000/mcp
+  PZZ_MCP_SERVER: http://pzz-mcp:8765/mcp
+  PZZ_API_URL: http://pzz-compare:8000
   CHAT_STORAGE: http://chat-storage:8000
   URBAN_API_URL: http://urban-api:8000/api
   SERVICE_AUTH_REALM: IDU

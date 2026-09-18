@@ -16,6 +16,7 @@ resources:
   - apps/chat-storage
   - apps/object-effects
   - apps/sirtep
+  - apps/buildplanner
   - apps/genbuilder
   - apps/genplanner
   - apps/pzz-compare

@@ -11,6 +11,7 @@ on:
           - urban-api
           - urban-mcp
           - frontend
+          - buildplanner
           - chat-storage
           - genbuilder
           - genplanner

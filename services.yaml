@@ -162,6 +162,18 @@ services:
     images:
       - {alias: api, kustomizeName: urban-assistant/sirtep, repository: 10.32.11.13:5000/sirtep, context: ., dockerfile: Dockerfile, target: null}
 
+  - name: buildplanner
+    smokeChecks:
+      - {url: 'http://buildplanner:8080/buildplanner/health', jsonEquals: {status: ok}}
+    source: {repository: IDUclub/BuildPlanner, branch: dev}
+    argocdPath: environments/dev/apps/buildplanner
+    healthEndpoint: /buildplanner/health
+    migration: null
+    configRevisionRequired: false
+    atomicImages: [api]
+    images:
+      - {alias: api, kustomizeName: urban-assistant/buildplanner, repository: 10.32.11.13:5000/buildplanner, context: ., dockerfile: Dockerfile, target: null}
+
   - name: genbuilder
     smokeChecks:
       - {url: 'http://genbuilder:8000/docs', contains: 'swagger-ui'}

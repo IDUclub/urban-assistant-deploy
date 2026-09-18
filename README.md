@@ -102,6 +102,7 @@ Bases используют логические имена образов; overl
 | `urban-api` | [IDUclub/idu_api](https://github.com/IDUclub/idu_api) | `api`, `migrator` | `/health_check/db` |
 | `urban-mcp` | [IDUclub/idu_api](https://github.com/IDUclub/idu_api) | `mcp` | MCP initialize для шести тематических endpoints |
 | `chat-storage` | [IDUclub/ChatStorage](https://github.com/IDUclub/ChatStorage) | `api` | `/ping` |
+| `buildplanner` | [IDUclub/BuildPlanner](https://github.com/IDUclub/BuildPlanner) | `api` | `/buildplanner/health`: `status: ok` |
 | `genbuilder` | [IDUclub/genbuilder_api](https://github.com/IDUclub/genbuilder_api) | `api` | `/docs`, Swagger UI |
 | `genplanner` | [IDUclub/GenPlanner](https://github.com/IDUclub/GenPlanner) | `api` для API и MCP | `/docs` API и `/health` MCP |
 | `gmart` | [IDUclub/gMART](https://github.com/IDUclub/gMART) | `agents`, `mcp` | `/ping` agents и `/health` MCP |

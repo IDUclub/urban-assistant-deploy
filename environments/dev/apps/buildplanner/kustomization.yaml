@@ -15,4 +15,4 @@ commonAnnotations:
 images:
   - name: urban-assistant/buildplanner
     newName: 10.32.11.13:5000/buildplanner
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    digest: sha256:aff9ea6d5b4e7552e747943975188102c69932b1583c99ef9f8f7aea9905fc72

@@ -27,7 +27,7 @@ paths:
     - fs_secret_key
     - keycloak_client_secret
     - keycloak_url
-    - ollama_api
+    - llm_api
   dev/genplanner:
     - ecodonut_api
     - keycloak_client_secret

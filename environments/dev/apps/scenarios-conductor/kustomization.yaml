@@ -4,6 +4,8 @@ namespace: urban-assistant-dev
 resources:
   - ../../../../apps/scenarios-conductor/base
   - vault-secret.yaml
+patches:
+  - path: cadastre-volume-patch.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: urban-assistant

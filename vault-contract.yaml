@@ -87,9 +87,7 @@ paths:
     - vllm_base_url
   dev/scenarios-conductor:
     - auth_server_url
-    - fileserver_url
-    - fs_access_key
-    - fs_secret_key
+    - cadastre_host_path
     - urban_api_client_secret
   dev/urban-api:
     - auth_server_url

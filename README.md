@@ -228,6 +228,18 @@ PR / push → dev приложения
 
 У Urban API `config.yaml` формируется Vault-шаблоном в [prerequisites/urban-api](environments/dev/prerequisites/urban-api/). Это отдельное Application: Secret нужен migration Job до обновления Deployment.
 
+У Scenarios Conductor кадастр читается из `/data/cadastre.gpkg` без скачивания из MinIO.
+В dev GeoPackage должен быть доступен по одному и тому же пути на всех worker-узлах.
+В Vault `urban-assistant-kv/dev/scenarios-conductor` требуется ключ `cadastre_host_path`:
+полный абсолютный путь к существующему файлу GeoPackage, без компонентов `..`.
+Весь путь хранится только в Vault, в Git его добавлять не нужно.
+VSO убирает начальный `/` и формирует `CADASTRE_SUBPATH`. Источник `hostPath` — `/`,
+но Deployment подключает через `subPathExpr` только выбранный файл, только для чтения;
+корень хоста целиком в контейнер не монтируется. Конфигурация приложения содержит `cadastre.path`;
+секция `fileserver` и ключи MinIO этому сервису больше не нужны.
+Перед синхронизацией подготовьте файл и ключ Vault и проверьте, что закреплённый
+образ поддерживает `cadastre.path`: старый образ с конфигом нового формата не запустится.
+
 <a id="frontend"></a>
 ## Frontend
 

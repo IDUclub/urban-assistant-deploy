@@ -32,7 +32,7 @@ paths:
     - ecodonut_api
     - keycloak_client_secret
     - keycloak_url
-    - ollama_base_url
+    - vllm_base_url
   dev/gmart:
     - auth_helper_api_key
     - auth_helper_url

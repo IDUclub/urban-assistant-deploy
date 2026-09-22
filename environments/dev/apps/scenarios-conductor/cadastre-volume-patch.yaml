@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scenarios-conductor
+spec:
+  template:
+    spec:
+      volumes:
+        - name: cadastre
+          hostPath:
+            # Only the file selected by the Vault-derived subPathExpr is mounted.
+            path: /
+            type: Directory

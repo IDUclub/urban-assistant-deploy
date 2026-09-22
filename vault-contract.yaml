@@ -62,7 +62,7 @@ paths:
     - neo4j_password
     - neo4j_user
     - ng_auth_helper_api_key
-    - ng_auth_helper_api_url
+    - auth_helper_api_url
     - ng_embeddings_url
     - ng_llm_base_url
     - ng_neo4j_uri

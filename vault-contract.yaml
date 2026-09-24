@@ -38,6 +38,7 @@ paths:
     - auth_helper_url
     - ollama_api_url
     - openai_base_url
+    - public_base_url
     - redis_password
     - service_auth_client_secret
     - service_auth_server_url

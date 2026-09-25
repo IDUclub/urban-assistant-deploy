@@ -252,8 +252,11 @@ Frontend собирается под окружение: значения `VITE_
 | `MAPBOX_PUBLIC_TOKEN` | `VITE_MAPBOX_TOKEN` |
 | `FRONTEND_KEYCLOAK_AUTH_URL` | `VITE_KEYCLOAK_AUTH_URL` |
 | `FRONTEND_KEYCLOAK_LOGOUT_REDIRECT` | `VITE_KEYCLOAK_AUTH_LOGOUT_REDIRECT` |
+| `SYNAPSE_WORKFLOW_ID` | `VITE_SYNAPSE_WORKFLOW_ID` |
 
-Эти значения становятся **публичными в браузере**, даже если переданы через GitHub Secrets. Здесь нельзя использовать серверные credentials или Keycloak client secret.
+Эти значения `VITE_*` становятся **публичными в браузере**, даже если переданы через GitHub Secrets. Здесь нельзя использовать серверные credentials или Keycloak client secret.
+
+Также из GitHub environment `dev-build` репозитория `Urban-Assistant-Client` в `service.env` передаются обязательные `SYNAPSE_EMAIL`, `SYNAPSE_PASSWORD` и `SYNAPSE_API_URL` под теми же именами, без префикса `VITE_`. Их значения не хранятся в Git. Это передача в файл сборки; загрузка этих переменных сервером при запуске контейнера должна быть обеспечена в клиенте отдельно.
 
 Чтобы изменить frontend-настройку:
 

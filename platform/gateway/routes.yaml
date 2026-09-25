@@ -143,6 +143,17 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /buildplanner
+      # BuildPlanner serves its API under /buildplanner; preserve this prefix.
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: buildplanner
+          port: 8080
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
             value: /
       backendRefs:
         - group: ""
@@ -151,7 +162,7 @@ spec:
           port: 3000
           weight: 1
 ---
-# gMART, PZZ, GenBuilder and GenPlanner use long-lived SSE responses.
+# gMART, PZZ, GenBuilder, GenPlanner and BuildPlanner use long-lived SSE responses.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:

@@ -37,6 +37,7 @@ class FrontendContractTests(unittest.TestCase):
             "VITE_GENBUILDER_API": "/genbuilder",
             "VITE_GENPLANNER_API": "/genplanner",
             "VITE_DOCUMENTS_API": "/idu-dvd",
+            "VITE_BUILDPLANNER_API": "/buildplanner",
         }
         for key, prefix in expected.items():
             with self.subTest(key=key):
@@ -48,6 +49,7 @@ class FrontendContractTests(unittest.TestCase):
             "/genbuilder": ("genbuilder", 8000, "/"),
             "/genplanner": ("genplanner", 8080, None),
             "/idu-dvd": ("idu-dvd", 8000, "/"),
+            "/buildplanner": ("buildplanner", 8080, None),
         }
         for prefix, (name, port, replacement) in expected.items():
             with self.subTest(prefix=prefix):

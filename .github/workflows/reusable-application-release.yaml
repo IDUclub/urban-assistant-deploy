@@ -148,7 +148,7 @@ jobs:
           SYNAPSE_EMAIL: ${{ secrets.SYNAPSE_EMAIL }}
           SYNAPSE_PASSWORD: ${{ secrets.SYNAPSE_PASSWORD }}
           SYNAPSE_API_URL: ${{ secrets.SYNAPSE_API_URL }}
-          VITE_SYNAPSE_WORKFLOW_ID: ${{ secrets.VITE_SYNAPSE_WORKFLOW_ID }}
+          SYNAPSE_WORKFLOW_ID: ${{ secrets.SYNAPSE_WORKFLOW_ID }}
         run: |
           bash .urban-assistant-deploy/scripts/render-frontend-env.sh dev > service.env
           rm -rf -- .urban-assistant-deploy

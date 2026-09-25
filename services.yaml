@@ -5,6 +5,10 @@ namespace: urban-assistant-dev
 registry: 10.32.11.13:5000
 policies:
   githubSecretBuildKeys:
+    - SYNAPSE_EMAIL
+    - SYNAPSE_PASSWORD
+    - SYNAPSE_API_URL
+    - VITE_SYNAPSE_WORKFLOW_ID
     - VITE_MAPBOX_TOKEN
     - VITE_KEYCLOAK_AUTH_LOGOUT_REDIRECT
     - VITE_KEYCLOAK_AUTH_URL

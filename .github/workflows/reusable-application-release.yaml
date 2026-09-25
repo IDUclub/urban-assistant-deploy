@@ -22,6 +22,14 @@ on:
         required: false
       FRONTEND_KEYCLOAK_LOGOUT_REDIRECT:
         required: false
+      SYNAPSE_EMAIL:
+        required: false
+      SYNAPSE_PASSWORD:
+        required: false
+      SYNAPSE_API_URL:
+        required: false
+      SYNAPSE_WORKFLOW_ID:
+        required: false
 
 permissions:
   contents: read
@@ -137,6 +145,10 @@ jobs:
           MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
           FRONTEND_KEYCLOAK_AUTH_URL: ${{ secrets.FRONTEND_KEYCLOAK_AUTH_URL }}
           FRONTEND_KEYCLOAK_LOGOUT_REDIRECT: ${{ secrets.FRONTEND_KEYCLOAK_LOGOUT_REDIRECT }}
+          SYNAPSE_EMAIL: ${{ secrets.SYNAPSE_EMAIL }}
+          SYNAPSE_PASSWORD: ${{ secrets.SYNAPSE_PASSWORD }}
+          SYNAPSE_API_URL: ${{ secrets.SYNAPSE_API_URL }}
+          VITE_SYNAPSE_WORKFLOW_ID: ${{ secrets.VITE_SYNAPSE_WORKFLOW_ID }}
         run: |
           bash .urban-assistant-deploy/scripts/render-frontend-env.sh dev > service.env
           rm -rf -- .urban-assistant-deploy

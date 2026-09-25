@@ -38,6 +38,7 @@ Dev работает в существующем кластере с одним 
       ├─ /pzz-compare       → PZZ Compare
       ├─ /genbuilder        → GenBuilder
       ├─ /genplanner        → GenPlanner
+      ├─ /buildplanner      → BuildPlanner
       └─ /idu-dvd           → IDU DVD
 
 Приложения

@@ -17,6 +17,12 @@ paths:
     - mongo_user
     - service_auth_client_secret
     - service_auth_server_url
+  dev/frontend:
+    - keycloak_auth_realm
+    - keycloak_auth_url
+    - synapse_api_url
+    - synapse_email
+    - synapse_password
   dev/gateway:
     - tls_crt
     - tls_key

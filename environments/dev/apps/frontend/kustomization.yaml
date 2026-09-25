@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: urban-assistant-dev
 resources:
   - ../../../../apps/frontend/base
+  - vault-secret.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: urban-assistant

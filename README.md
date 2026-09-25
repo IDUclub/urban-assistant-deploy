@@ -256,7 +256,19 @@ Frontend собирается под окружение: значения `VITE_
 
 Эти значения `VITE_*` становятся **публичными в браузере**, даже если переданы через GitHub Secrets. Здесь нельзя использовать серверные credentials или Keycloak client secret.
 
-Также из GitHub environment `dev-build` репозитория `Urban-Assistant-Client` в `service.env` передаются обязательные `SYNAPSE_EMAIL`, `SYNAPSE_PASSWORD` и `SYNAPSE_API_URL` под теми же именами, без префикса `VITE_`. Их значения не хранятся в Git. Это передача в файл сборки; загрузка этих переменных сервером при запуске контейнера должна быть обеспечена в клиенте отдельно.
+Серверный proxy `/api/synapse` получает runtime-переменные через [VaultStaticSecret](environments/dev/apps/frontend/vault-secret.yaml): Vault → Kubernetes Secret `frontend-secrets` → окружение Node.js. В `service.env` эти значения не записываются. `SYNAPSE_WORKFLOW_ID` остаётся GitHub Secret для сборки `VITE_SYNAPSE_WORKFLOW_ID`.
+
+Перед синхронизацией манифестов заполнить путь `dev/frontend` в KV v2 mount `urban-assistant-kv`:
+
+| Ключ Vault | Переменная контейнера | Значение |
+|---|---|---|
+| `synapse_api_url` | `SYNAPSE_API_URL` | URL Synapse API |
+| `synapse_email` | `SYNAPSE_EMAIL` | Email сервисной учётной записи Synapse |
+| `synapse_password` | `SYNAPSE_PASSWORD` | Пароль сервисной учётной записи Synapse |
+| `keycloak_auth_url` | `KEYCLOAK_AUTH_URL` | Базовый URL из `FRONTEND_KEYCLOAK_AUTH_URL`, доступный из pod |
+| `keycloak_auth_realm` | `KEYCLOAK_AUTH_REALM` | Realm из `VITE_KEYCLOAK_AUTH_REALM`, для dev — `IDU` |
+
+GitHub Secrets автоматически в Vault не переносятся. Без Secret новый pod не запустится; без настроек Keycloak proxy вернёт 503. При изменении Secret Vault Secrets Operator перезапускает Deployment. Маршрут `/api/synapse` обслуживается существующим Gateway-правилом `/`. После переноса значений три GitHub Secrets `SYNAPSE_EMAIL`, `SYNAPSE_PASSWORD`, `SYNAPSE_API_URL` больше не нужны этой сборке.
 
 Чтобы изменить frontend-настройку:
 

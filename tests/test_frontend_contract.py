@@ -79,6 +79,41 @@ class FrontendContractTests(unittest.TestCase):
                 self.assertNotIn(key, self.env)
                 self.assertIn(key, self.catalog["policies"]["githubSecretBuildKeys"])
 
+    def test_synapse_server_settings_are_delivered_at_runtime(self) -> None:
+        spec = yaml.safe_load(
+            (ROOT / "environments/dev/apps/frontend/vault-secret.yaml").read_text(encoding="utf-8")
+        )["spec"]
+        expected = {
+            "SYNAPSE_EMAIL", "SYNAPSE_PASSWORD", "SYNAPSE_API_URL",
+            "KEYCLOAK_AUTH_URL", "KEYCLOAK_AUTH_REALM",
+        }
+        templates = spec["destination"]["transformation"]["templates"]
+        self.assertEqual(set(templates), expected)
+        for name in expected:
+            self.assertEqual(templates[name]["text"], '{{ get .Secrets "' + name.lower() + '" }}')
+        deployment = next(yaml.safe_load_all(
+            (ROOT / "apps/frontend/base/workload.yaml").read_text(encoding="utf-8")
+        ))
+        container = deployment["spec"]["template"]["spec"]["containers"][0]
+        self.assertIn({"secretRef": {"name": spec["destination"]["name"]}}, container["envFrom"])
+        self.assertIn(
+            {"kind": "Deployment", "name": deployment["metadata"]["name"]},
+            spec["rolloutRestartTargets"],
+        )
+        workflow = yaml.safe_load(
+            (ROOT / ".github/workflows/reusable-application-release.yaml").read_text(encoding="utf-8")
+        )
+        build_env = next(
+            step["env"] for step in workflow["jobs"]["build"]["steps"]
+            if step.get("name") == "Render frontend build environment"
+        )
+        renderer = (ROOT / "scripts/render-frontend-env.sh").read_text(encoding="utf-8")
+        for name in ("SYNAPSE_EMAIL", "SYNAPSE_PASSWORD", "SYNAPSE_API_URL"):
+            self.assertNotIn(name, build_env)
+            self.assertNotIn(name, renderer)
+            self.assertNotIn(name, self.env)
+        self.assertEqual(build_env["SYNAPSE_WORKFLOW_ID"], "${{ secrets.SYNAPSE_WORKFLOW_ID }}")
+
 
 if __name__ == "__main__":
     unittest.main()

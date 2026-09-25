@@ -25,6 +25,9 @@ spec:
         - name: frontend
           image: urban-assistant/frontend:base
           imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: frontend-secrets
           env:
             - name: PORT
               value: "3000"

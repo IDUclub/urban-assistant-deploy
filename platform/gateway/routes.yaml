@@ -143,6 +143,23 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /buildplanner/buildplanner
+      # The frontend adds /buildplanner to its /buildplanner API base URL.
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /buildplanner
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: buildplanner
+          port: 8080
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
             value: /buildplanner
       # BuildPlanner serves its API under /buildplanner; preserve this prefix.
       backendRefs:

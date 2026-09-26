@@ -50,6 +50,7 @@ class FrontendContractTests(unittest.TestCase):
             "/genplanner": ("genplanner", 8080, None),
             "/idu-dvd": ("idu-dvd", 8000, "/"),
             "/buildplanner": ("buildplanner", 8080, None),
+            "/buildplanner/buildplanner": ("buildplanner", 8080, "/buildplanner"),
         }
         for prefix, (name, port, replacement) in expected.items():
             with self.subTest(prefix=prefix):

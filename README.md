@@ -39,6 +39,7 @@ Dev работает в существующем кластере с одним 
       ├─ /genbuilder        → GenBuilder
       ├─ /genplanner        → GenPlanner
       ├─ /buildplanner      → BuildPlanner
+      │  /buildplanner/buildplanner/* → /buildplanner/* (совместимость с URL frontend)
       └─ /idu-dvd           → IDU DVD
 
 Приложения

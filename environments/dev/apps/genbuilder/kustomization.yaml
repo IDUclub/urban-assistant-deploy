@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 0c678b3e0ed848ce2e22be66aa6330675dfaaa2e
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/genbuilder_api/actions/runs/36582307605
+  deployment.urban-assistant/source-revision: f97222bdb30c04b3de649108e613ee94a955d6c3
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/genbuilder_api/actions/runs/36856119046
 images:
   - name: urban-assistant/genbuilder
     newName: 10.32.11.13:5000/genbuilder
-    digest: sha256:294df587e188a9808713219346c3aca59720f1c83695b1dd8093bac20db7d9bc
+    digest: sha256:20a02808d41076e5aa978c3f195382e1ac8e8c41be227b661e3755b513830433

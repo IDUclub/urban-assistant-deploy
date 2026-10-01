@@ -16,5 +16,5 @@ data:
     KEYCLOAK_REALM=IDU
     KEYCLOAK_CLIENT_ID=genbuilder
     FILESERVER_BUCKET_NAME=genbuilder.dev
-    FILESERVER_SECURE=false
+    FILESERVER_SECURE=true
     OUTPUTS_DIR=outputs

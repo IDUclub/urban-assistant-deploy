@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 7e29ac02484cdb1f8e59d0d38f9d19b1da52b371
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/ObjectEffectsAPI/actions/runs/36974344575
+  deployment.urban-assistant/source-revision: e15efcde2efeb89c6941954b34991027a28095e9
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/ObjectEffectsAPI/actions/runs/37033662930
 images:
   - name: urban-assistant/object-effects
     newName: 10.32.11.13:5000/object_effects
-    digest: sha256:fe1eddcabd79fabee82f5f5210e57f734c68f7faf79525f898a080e72168841a
+    digest: sha256:96eed5c1bf3c0b2906badcf80a289b2b59ad6523ee0828d6d0f91f4abcc8ff28

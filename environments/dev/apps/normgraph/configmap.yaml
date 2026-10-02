@@ -8,7 +8,7 @@ data:
   NG_URBAN_API_URL: http://urban-api:8000/api
   NG_LLM_PROVIDER: openai_compatible
   NG_LLM_MODEL: gpt-oss-20b
-  NG_LLM_REASONING_EFFORT: low
+  NG_LLM_REASONING_EFFORT: medium
   NG_EMBEDDINGS_PROVIDER: openai_compatible
   NG_EMBEDDINGS_MODEL: ai-sage/Giga-Embeddings-instruct
   NG_KAFKA_BOOTSTRAP_SERVERS: urban-assistant-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092

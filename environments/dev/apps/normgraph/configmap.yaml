@@ -5,8 +5,10 @@ metadata:
 data:
   NG_NEO4J_DATABASE: neo4j
   NG_DVD_BASE_URL: http://idu-dvd:8000
+  NG_URBAN_API_URL: http://urban-api:8000/api
   NG_LLM_PROVIDER: openai_compatible
   NG_LLM_MODEL: gpt-oss-20b
+  NG_LLM_REASONING_EFFORT: low
   NG_EMBEDDINGS_PROVIDER: openai_compatible
   NG_EMBEDDINGS_MODEL: ai-sage/Giga-Embeddings-instruct
   NG_KAFKA_BOOTSTRAP_SERVERS: urban-assistant-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092

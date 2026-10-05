@@ -58,11 +58,13 @@ paths:
     - dvd_embeddings_url
     - dvd_llm_base_url
     - dvd_minio_endpoint
+    - dvd_ocr_base_url
     - dvd_ollama_base
     - dvd_qdrant_url
     - dvd_service_auth_server_url
     - fs_access_key
     - fs_secret_key
+    - ocr_api_key
     - redis_password
     - service_auth_client_secret
   dev/normgraph:

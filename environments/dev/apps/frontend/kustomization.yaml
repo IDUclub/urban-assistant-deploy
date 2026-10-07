@@ -10,10 +10,10 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: bf914161a71b09118155b42fa3767a1f04276c59
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/Urban-Assistant-Client/actions/runs/37311513314
-  deployment.urban-assistant/config-revision: 688da1a7b9cf7c64a0439392c431235c68107c70
+  deployment.urban-assistant/source-revision: a6c29c89d97156b7dd4c0175763c38eabb131b12
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/Urban-Assistant-Client/actions/runs/37610981011
+  deployment.urban-assistant/config-revision: 34b67dc6fb1655c17e08d66c7bde93dafabe29c7
 images:
   - name: urban-assistant/frontend
     newName: 10.32.11.13:5000/urban-assistant-client
-    digest: sha256:c9e279300a6e24bf1c3e8f18060aa3910333c812169e61029ab08e34a0ab1abb
+    digest: sha256:da5c0d59e5adf6b276ce46438b59e40435a54510f6d10cb7eb592e93c00aece6

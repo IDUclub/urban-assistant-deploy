@@ -90,6 +90,7 @@ paths:
     - fs_secret_key
     - keycloak_client_secret
     - keycloak_url
+    - normgraph_base_url
     - ollama_base_url
     - public_base_url
     - redis_password

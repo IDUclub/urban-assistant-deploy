@@ -28,7 +28,6 @@ data:
     GEO_LAYER_URL_TTL_SECONDS=3600
     URBAN_API_BASE_URL=http://urban-api:8000
     URBAN_API_TIMEOUT_SECONDS=30
-    NORMGRAPH_BASE_URL=http://normgraph:8020
     AUTH_VERIFY=true
     AUTH_CLIENT_ID=pzz-compare
     AUTH_VERIFY_AUD=false

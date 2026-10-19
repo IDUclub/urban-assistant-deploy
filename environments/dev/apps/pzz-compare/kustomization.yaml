@@ -9,9 +9,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: b2fe6d26892171a127f71ff44830c364730f2f66
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/PzzCompareAPI/actions/runs/39268500582
+  deployment.urban-assistant/source-revision: 5438db8a3efb7252c17f7954ee20a0642e804ad9
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/PzzCompareAPI/actions/runs/39301908779
 images:
   - name: urban-assistant/pzz-compare
     newName: 10.32.11.13:5000/pzz-pipeline
-    digest: sha256:3d97daf60e825d264414abffabb5b97f59fb170c4c2b78ac9a7624a0dfacc433
+    digest: sha256:37cac39c08e42b3aae99e10b645f4b9a78ed0ebfdd35212115b9ccd999c86eb5

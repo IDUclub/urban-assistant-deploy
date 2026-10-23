@@ -11,12 +11,12 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: 66ee3c2f2aaa7c20409d1b1d3ef9d45488e1be8e
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/gMART/actions/runs/39959678950
+  deployment.urban-assistant/source-revision: 7bfcbf9706a77802f48e2def5fdcf8a374d7efa0
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/gMART/actions/runs/39962081168
 images:
   - name: urban-assistant/gmart-agents
     newName: 10.32.11.13:5000/idu_agents
-    digest: sha256:a49e9cfdfb7206a7c8438e207920bc22ace7fa1d2e9d53529f5f5cda54accd41
+    digest: sha256:e866353993e2cc422300911114f88eff3276c986fed618e7924978d7979ef9e5
   - name: urban-assistant/gmart-mcp
     newName: 10.32.11.13:5000/idu_mcp
-    digest: sha256:a6021b668d0eb2cd4d8dd79b38f1d5107d1969d6ac5d924b0b9d11e16ab4828d
+    digest: sha256:08d15db51ef46b1e641bb11717b68fdb127677cb4d4bec546e6bdba3bce26798

@@ -7,9 +7,8 @@ data:
   FASTAPI_WORKERS: "1"
   FASTMCP_WORKERS: "1"
   LLM_BACKEND: openai
-  OPENAI_THINK_EFFORT: medium
-  OPENAI_THINK_MODE: medium
-  DEFAULT_LLM_MODEL_HINT: gpt-oss
+  OPENAI_THINK_MODE: chat_template
+  DEFAULT_LLM_MODEL: qwen3.8-27b
   IDU_MCP_SERVER: http://gmart-mcp:8000/mcp
   OBJECTS_EFFECTS_MCP_SERVER: http://object-effects:8080/effects/mcp
   DVD_MCP_SERVER: http://idu-dvd:8000/mcp

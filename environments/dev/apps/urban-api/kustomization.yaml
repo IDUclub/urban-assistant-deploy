@@ -9,14 +9,14 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: e76ef1951c0313b6c0282bca8211b6bc26a33b2e
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/idu_api/actions/runs/35585828674
+  deployment.urban-assistant/source-revision: 017ed6caf08d05a3a8e2d26dcd5556a993e8a752
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/idu_api/actions/runs/40496726961
 images:
   - name: urban-assistant/urban-api
     newName: 10.32.11.13:5000/urban_api
-    digest: sha256:f20206e4082dfc6d2c0b56e5eed484f0cd48c81e593ac5960d63b99036527871
+    digest: sha256:27f381f797003d7359345039a3d5e292e11dc35fe97b37d91288bbcc14ae89e2
   - name: urban-assistant/urban-migrator
     newName: 10.32.11.13:5000/urban_migrator
-    digest: sha256:3e2209103cb948c92df1e5cdc7a5b612a9057505bdb96c99006c3f9ed044579d
+    digest: sha256:3e69cb5ff2184d9bc727f17d61ea35852cb5ec8f7e322b0d1f7145f33bb14f20
 patches:
   - path: migration-wait-patch.yaml

@@ -8,7 +8,7 @@ data:
     UrbanDB_SOURCE=OSM
     UrbanDB_YEAR=2024
     ChatStorage_API=http://chat-storage:8000
-    Chat_Model=gpt-oss-20b
+    CHAT_MODEL=qwen3.8-27b
     LOG_FILE=/tmp/genbuilder/genbuilder.log
     PROMETHEUS_PORT=9464
     AUTH_VERIFY=true

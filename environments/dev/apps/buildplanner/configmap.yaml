@@ -13,7 +13,7 @@ data:
     GENBUILDER_API=http://genbuilder:8000
     SIRTEP_API=http://sirtep:8080
     CHAT_STORAGE_API=http://chat-storage:8000
-    LLM_MODEL=gpt-oss-20b
+    CHAT_MODEL=qwen3.8-27b
     KEYCLOAK_REALM=IDU
     KEYCLOAK_CLIENT_ID=buildplanner
     PUBLISH_TO_URBAN=true

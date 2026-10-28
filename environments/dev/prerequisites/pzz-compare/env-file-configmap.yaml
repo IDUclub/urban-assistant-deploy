@@ -19,7 +19,7 @@ data:
     VLLM_THINK_FIELD_NAME=think
     EMBED_MAX_PARALLEL_REQUESTS=1
     EMBED_MODEL=ai-sage/Giga-Embeddings-instruct
-    GENERATE_MODEL=openai/gpt-oss-20b
+    GENERATE_MODEL=qwen3.8-27b
     CHAT_STORAGE_BASE_URL=http://chat-storage:8000
     CHAT_STORAGE_TIMEOUT_SECONDS=10
     CHAT_MODEL=qwen3.8-27b

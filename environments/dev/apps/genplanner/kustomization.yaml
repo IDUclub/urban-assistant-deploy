@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: dbbbe2cee839f6215e286db9549dcf958dcf20d3
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/GenPlanner/actions/runs/40481581476
+  deployment.urban-assistant/source-revision: 2c7cd77cbc3531373404069b09f809033b9ecbe9
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/GenPlanner/actions/runs/40679224458
 images:
   - name: urban-assistant/genplanner
     newName: 10.32.11.13:5000/genplanner_api
-    digest: sha256:63c454ed497e51eba8d31f70357d593205a0c1950989e4e268078fb0c6c5256a
+    digest: sha256:603550cad40e76da5f5982de0111fcc3aac31adf43ed163030aef4eaf0401691

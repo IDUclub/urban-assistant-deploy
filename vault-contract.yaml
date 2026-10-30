@@ -36,6 +36,9 @@ paths:
     - vllm_base_url
   dev/genplanner:
     - ecodonut_api
+    - fileserver_endpoint
+    - fs_access_key
+    - fs_secret_key
     - keycloak_client_secret
     - keycloak_url
     - vllm_base_url

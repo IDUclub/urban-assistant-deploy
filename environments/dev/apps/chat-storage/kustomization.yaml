@@ -11,9 +11,9 @@ labels:
       environment: dev
     includeSelectors: false
 commonAnnotations:
-  deployment.urban-assistant/source-revision: d55787dea434d984c2531388905d7182396340e8
-  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/ChatStorage/actions/runs/40872780322
+  deployment.urban-assistant/source-revision: 4f00b71c2210b0c0e70333fd974d8582ad9fa583
+  deployment.urban-assistant/source-workflow: https://github.com/IDUclub/ChatStorage/actions/runs/41139283302
 images:
   - name: urban-assistant/chat-storage
     newName: 10.32.11.13:5000/chat_storage
-    digest: sha256:47888618993d4b386b0870945d7ae184f7f74bff477a29b3857e4fbe9d52c79e
+    digest: sha256:d572dca5fc21f987fcacd094eda111d3d991fd6b6c1f73388aadb54cfeb78324
